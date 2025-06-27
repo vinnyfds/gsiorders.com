@@ -26,5 +26,10 @@
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.0.4",
+    "@types/react": "^19.1.8",
+    "typescript": "^5.8.3"
+  }
 }
