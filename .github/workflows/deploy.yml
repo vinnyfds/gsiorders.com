@@ -1,0 +1,42 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build && npm run export
+
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete
+        env:
+          AWS_S3_BUCKET: gsiorders.com
+          AWS_ACCESS_KEY_ID: ${{ secrets.awsAKIA4DMVQLM77AFMPLHN }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.8LwCrisv/CXcJFnnjt4cyQkTl894c9rbLs+E+vhA }}
+          SOURCE_DIR: "out"
+
+      - name: Invalidate CloudFront
+        uses: chetan/invalidate-cloudfront-action@v2
+        with:
+          distribution-id: E2OPDO0F4736ZP
+          paths: "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.awsAKIA4DMVQLM77AFMPLHN }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.8LwCrisv/CXcJFnnjt4cyQkTl894c9rbLs+E+vhA }}
