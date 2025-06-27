@@ -28,8 +28,8 @@ jobs:
           args: --delete
         env:
           AWS_S3_BUCKET: gsiorders.com
-          AWS_ACCESS_KEY_ID: ${{ secrets.awsAKIA4DMVQLM77AFMPLHN }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.8LwCrisv/CXcJFnnjt4cyQkTl894c9rbLs+E+vhA }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SOURCE_DIR: "out"
 
       - name: Invalidate CloudFront
@@ -38,5 +38,5 @@ jobs:
           distribution-id: E2OPDO0F4736ZP
           paths: "/*"
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.awsAKIA4DMVQLM77AFMPLHN }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.8LwCrisv/CXcJFnnjt4cyQkTl894c9rbLs+E+vhA }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
