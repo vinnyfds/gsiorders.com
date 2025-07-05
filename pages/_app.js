@@ -1,5 +1,6 @@
 import React from "react";
 import Head from "next/head";
+import Layout from "../src/components/Layout";
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -17,7 +18,9 @@ function MyApp({ Component, pageProps }) {
           }}
         />
       </Head>
-      <Component {...pageProps} />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </>
   );
 }
