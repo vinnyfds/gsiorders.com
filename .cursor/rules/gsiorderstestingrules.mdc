@@ -1,0 +1,336 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🧪 **MISSING CURSOR AI RULES - TESTING & ADDITIONAL GUIDELINES**
+
+
+---
+
+## **🧪 TESTING RULES**
+
+### **Unit Testing (Jest/Vitest)**
+```typescript
+// Component Test Pattern
+import { render, screen, fireEvent } from '@testing-library/react';
+import ProductCard from '../ProductCard';
+
+describe('ProductCard', () => {
+  const mockProduct = {
+    id: '1',
+    name: 'Test Product',
+    price: 29.99,
+    images: ['test.jpg'],
+    inventory_count: 10,
+    brands: { name: 'Test Brand', slug: 'test' }
+  };
+
+  it('renders product information correctly', () => {
+    render(<ProductCard product={mockProduct} />);
+    expect(screen.getByText('Test Product')).toBeInTheDocument();
+    expect(screen.getByText('$29.99')).toBeInTheDocument();
+  });
+
+  it('calls onAddToCart when button clicked', () => {
+    const mockAddToCart = jest.fn();
+    render(<ProductCard product={mockProduct} onAddToCart={mockAddToCart} />);
+    
+    fireEvent.click(screen.getByText('Add to Cart'));
+    expect(mockAddToCart).toHaveBeenCalledWith('1');
+  });
+});
+```
+
+### **API Testing Rules**
+```typescript
+// API Test Pattern
+import { createMocks } from 'node-mocks-http';
+import handler from '../pages/api/products';
+
+describe('/api/products', () => {
+  it('returns products with brand filtering', async () => {
+    const { req, res } = createMocks({
+      method: 'GET',
+      query: { brand: 'liquidheaven' }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(200);
+    const data = JSON.parse(res._getData());
+    expect(data.products).toBeDefined();
+  });
+});
+```
+
+### **E2E Testing (Cypress) Rules**
+```typescript
+// E2E Test Pattern
+describe('Checkout Flow', () => {
+  it('completes full purchase journey', () => {
+    cy.visit('/products');
+    cy.contains('Add to Cart').first().click();
+    cy.get('[data-testid="cart-icon"]').click();
+    cy.contains('Proceed to Checkout').click();
+    
+    // Stripe test card
+    cy.get('[data-testid="card-number"]').type('4242424242424242');
+    cy.get('[data-testid="card-expiry"]').type('1234');
+    cy.get('[data-testid="card-cvc"]').type('123');
+    
+    cy.contains('Complete Payment').click();
+    cy.url().should('include', '/success');
+  });
+});
+```
+
+---
+
+## **🎯 DATA ATTRIBUTES FOR TESTING**
+
+**ALWAYS add data-testid attributes:**
+```jsx
+// Button Pattern
+<button 
+  data-testid="add-to-cart-btn"
+  className="bg-brand-primary..."
+>
+  Add to Cart
+</button>
+
+// Form Pattern
+<input 
+  data-testid="search-input"
+  placeholder="Search products..."
+  className="w-full..."
+/>
+
+// Navigation Pattern
+<nav data-testid="main-navigation">
+  <a data-testid="nav-products" href="/products">Products</a>
+  <a data-testid="nav-cart" href="/cart">Cart</a>
+</nav>
+```
+
+---
+
+## **🚀 PERFORMANCE TESTING RULES**
+
+### **Lighthouse Metrics Targets**
+```typescript
+// Performance Test Pattern
+describe('Performance', () => {
+  it('meets Core Web Vitals', () => {
+    // LCP (Largest Contentful Paint) < 2.5s
+    // FID (First Input Delay) < 100ms  
+    // CLS (Cumulative Layout Shift) < 0.1
+    cy.visit('/products');
+    cy.lighthouse({
+      performance: 90,
+      accessibility: 95,
+      'best-practices': 90,
+      seo: 90
+    });
+  });
+});
+```
+
+### **Load Testing Rules**
+```bash
+# API Load Test Pattern
+curl -X POST http://localhost:3000/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"brand":"liquidheaven"}' \
+  --connect-timeout 5 \
+  --max-time 10
+```
+
+---
+
+## **♿ ACCESSIBILITY TESTING RULES**
+
+```typescript
+// A11y Test Pattern
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+describe('Accessibility', () => {
+  it('has no accessibility violations', async () => {
+    const { container } = render(<ProductCard product={mockProduct} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+});
+```
+
+**ALWAYS include:**
+- `alt` attributes for images
+- `aria-label` for buttons without text
+- `role` attributes for custom components
+- Keyboard navigation support
+- Color contrast ratios 4.5:1 minimum
+
+---
+
+## **📁 ADDITIONAL DEVELOPMENT RULES**
+
+### **Environment Management**
+```typescript
+// Environment Validation Pattern
+const requiredEnvVars = [
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'SUPABASE_SERVICE_KEY', 
+  'STRIPE_SECRET_KEY',
+  'STRIPE_PUBLISHABLE_KEY'
+];
+
+requiredEnvVars.forEach(envVar => {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
+  }
+});
+```
+
+### **Logging Rules**
+```typescript
+// Logging Pattern
+console.log(`✅ ${functionName}: Success - ${description}`);
+console.error(`❌ ${functionName}: Error - ${error.message}`);
+console.warn(`⚠️ ${functionName}: Warning - ${warning}`);
+
+// In production, use structured logging
+if (process.env.NODE_ENV === 'production') {
+  logger.info('checkout_started', { userId, cartTotal, timestamp });
+}
+```
+
+### **Code Documentation Rules**
+```typescript
+/**
+ * Adds a product to the user's shopping cart
+ * @param productId - UUID of the product to add
+ * @param quantity - Number of items to add (default: 1)
+ * @returns Promise<CartResponse> - Updated cart data
+ * @throws {Error} When product is out of stock
+ */
+const addToCart = async (productId: string, quantity: number = 1): Promise<CartResponse> => {
+  // Implementation
+};
+```
+
+---
+
+## **🔄 CI/CD PIPELINE RULES**
+
+### **GitHub Actions Pattern**
+```yaml
+# .github/workflows/test.yml
+name: Test Suite
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run test:unit
+      - run: npm run test:e2e
+      - run: npm run build
+```
+
+### **Pre-commit Hooks**
+```json
+// package.json
+{
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run test:unit",
+      "pre-push": "npm run build && npm run test:e2e"
+    }
+  }
+}
+```
+
+---
+
+## **🛡️ SECURITY TESTING RULES**
+
+```typescript
+// Security Test Pattern
+describe('Security', () => {
+  it('prevents SQL injection', async () => {
+    const maliciousInput = "'; DROP TABLE products; --";
+    const { req, res } = createMocks({
+      method: 'GET',
+      query: { search: maliciousInput }
+    });
+    
+    await handler(req, res);
+    expect(res._getStatusCode()).toBe(200); // Should handle gracefully
+  });
+
+  it('validates input sanitization', () => {
+    const xssPayload = '<script>alert("xss")</script>';
+    const sanitized = sanitizeInput(xssPayload);
+    expect(sanitized).not.toContain('<script>');
+  });
+});
+```
+
+---
+
+## **📊 MONITORING & DEBUGGING RULES**
+
+```typescript
+// Error Boundary Pattern
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Component Error:', error, errorInfo);
+    // Send to monitoring service in production
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div className="error-fallback">Something went wrong.</div>;
+    }
+    return this.props.children;
+  }
+}
+```
+
+---
+
+**✅ COMPLETE CURSOR AI RULES CHECKLIST:**
+- [x] File structure & naming
+- [x] Styling & CSS guidelines  
+- [x] Supabase integration patterns
+- [x] Stripe payment flows
+- [x] API route standards
+- [x] React component patterns
+- [x] Security protocols
+- [x] Brand-specific theming
+- [x] Responsive design rules
+- [x] **✅ Unit testing patterns**
+- [x] **✅ API testing standards**  
+- [x] **✅ E2E testing flows**
+- [x] **✅ Accessibility requirements**
+- [x] **✅ Performance benchmarks**
+- [x] **✅ Security testing**
+- [x] **✅ CI/CD pipeline rules**
+- [x] **✅ Monitoring & debugging**
+
+

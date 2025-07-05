@@ -1,0 +1,7 @@
+ID,Task,Type,Estimated Time (hrs),Depends On,Status,Priority,Assignee,Start Date,End Date,Blockers,Budget_Allocated,Actual_Hours_Spent,Resource_Requirements,Skill_Level_Required,Risk_Level,Quality_Check_Status,Acceptance_Criteria_Met,Bug_Count,Milestone
+1.1,Initialize Supabase Project,Infrastructure,1.0,,Pending,High,DevOps,2025-07-01,2025-07-01,,,,,,,,,,Infrastructure Complete (July 3)
+1.2,Apply SQL DDL Schema,Infrastructure,1.0,1.1,Pending,High,Backend,2025-07-02,2025-07-02,1.1,,,,,,,,,Infrastructure Complete (July 3)
+2.1,Create ProductCard.tsx,Frontend,1.0,1.2,Pending,High,Frontend,2025-07-03,2025-07-03,1.2,,,,,,,,,Frontend MVP Done (July 10)
+2.2,Create CartModal.tsx,Frontend,2.0,2.1,Pending,Medium,Frontend,2025-07-04,2025-07-04,2.1,,,,,,,,,Frontend MVP Done (July 10)
+3.1,Create /api/products,Backend,1.5,1.2,Pending,High,Backend,2025-07-03,2025-07-03,1.2,,,,,,,,,Backend APIs Ready (July 17)
+4.1,Create unit test for ProductCard,Testing,1.0,2.1,Pending,Medium,QA,2025-07-05,2025-07-05,2.1,,,,,,,,,QA Sign-off (July 24)
