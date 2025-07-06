@@ -1,0 +1,19 @@
+PS D:\GSIORDERS\gsiorders.com> Invoke-WebRequest -Uri "http://localhost:3002/api/reviews" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"rating":6,"comment":"Invalid rating"}'
+
+StatusCode        : 400
+StatusDescription : Bad Request
+Content           : {"error":"Missing required fields: productId, rating, comment"}
+RawContent        : HTTP/1.1 400 Bad Request
+                    Connection: keep-alive
+                    Content-Length: 57
+                    Content-Type: application/json
+                    Date: Sat, 07 Dec 2024 16:55:00 GMT
+                    
+                    {"error":"Missing required fields: productId, rating, comment"}
+Forms             : {}
+Headers           : {[Connection, keep-alive], [Content-Length, 57], [Content-Type, application/json], [Date, Sat, 07 Dec 2024 16:55:00 GMT]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 57 

@@ -1,0 +1,19 @@
+PS D:\GSIORDERS\gsiorders.com> Invoke-WebRequest -Uri "http://localhost:3002/api/wishlist" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"productId":"650e8400-e29b-41d4-a716-446655440001","action":"add"}'
+
+StatusCode        : 201
+StatusDescription : Created
+Content           : {"success":true,"isSaved":true,"message":"Added \"Premium Vape Cartridge\" to wishlist"}
+RawContent        : HTTP/1.1 201 Created
+                    Connection: keep-alive
+                    Content-Length: 89
+                    Content-Type: application/json
+                    Date: Sat, 07 Dec 2024 16:56:00 GMT
+                    
+                    {"success":true,"isSaved":true,"message":"Added \"Premium Vape Cartridge\" to wishlist"}
+Forms             : {}
+Headers           : {[Connection, keep-alive], [Content-Length, 89], [Content-Type, application/json], [Date, Sat, 07 Dec 2024 16:56:00 GMT]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 89 

@@ -8,42 +8,46 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  moduleNameMapper: {
-    // Handle module aliases (this will be automatically configured for you based on your tsconfig.json paths)
-    '^@/components/(.*)$': '<rootDir>/components/$1',
-    '^@/pages/(.*)$': '<rootDir>/pages/$1',
-    '^@/src/(.*)$': '<rootDir>/src/$1',
-  },
-  testEnvironment: 'jest-environment-jsdom',
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    'pages/**/*.{js,jsx,ts,tsx}',
-    '!**/*.d.ts',
-    '!**/node_modules/**',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+  projects: [
+    {
+      displayName: 'API Tests',
+      testMatch: ['<rootDir>/__tests__/api/**/*.test.ts'],
+      preset: 'ts-jest/presets/default-esm',
+      testEnvironment: 'node',
+      extensionsToTreatAsEsm: ['.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      transformIgnorePatterns: [
+        '/node_modules/(?!(@supabase)/)'
+      ],
+      collectCoverageFrom: [
+        'pages/api/reviews.ts',
+        'pages/api/wishlist.ts'
+      ],
+      coverageThreshold: {
+        global: {
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80
+        }
+      }
     },
-  },
-  // Handle ES modules
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true
+    {
+      displayName: 'Component Tests',
+      testMatch: ['<rootDir>/__tests__/components/**/*.test.tsx'],
+      testEnvironment: 'jsdom',
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      collectCoverageFrom: [
+        'src/components/**/*.{ts,tsx}',
+        '!**/*.d.ts',
+        '!**/node_modules/**',
+      ],
+      moduleNameMapping: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      }
     }
-  },
-  transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }]
-  },
-  transformIgnorePatterns: [
-    'node_modules/(?!(@supabase/supabase-js|@supabase/postgrest-js|@supabase/storage-js|@supabase/gotrue-js|@supabase/realtime-js|@supabase/functions-js)/)'
   ]
-}
+};
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig) 
+module.exports = createJestConfig(customJestConfig); 
