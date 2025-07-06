@@ -30,6 +30,19 @@ const customJestConfig = {
       statements: 80,
     },
   },
+  // Handle ES modules
+  extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  },
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }]
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@supabase/supabase-js|@supabase/postgrest-js|@supabase/storage-js|@supabase/gotrue-js|@supabase/realtime-js|@supabase/functions-js)/)'
+  ]
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
