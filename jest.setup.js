@@ -1,14 +1,14 @@
 // jest.setup.js
-import '@testing-library/jest-dom'
+import "@testing-library/jest-dom";
 
 // Mock next/router
-jest.mock('next/router', () => ({
+jest.mock("next/router", () => ({
   useRouter() {
     return {
-      route: '/',
-      pathname: '/',
+      route: "/",
+      pathname: "/",
       query: {},
-      asPath: '/',
+      asPath: "/",
       push: jest.fn(),
       pop: jest.fn(),
       reload: jest.fn(),
@@ -20,18 +20,18 @@ jest.mock('next/router', () => ({
         off: jest.fn(),
         emit: jest.fn(),
       },
-    }
+    };
   },
-}))
+}));
 
 // Mock window.location - Override existing location
 delete window.location;
 window.location = {
-  href: 'http://localhost:3000',
-  origin: 'http://localhost:3000',
-  pathname: '/',
-  search: '',
-  hash: '',
+  href: "http://localhost:3000",
+  origin: "http://localhost:3000",
+  pathname: "/",
+  search: "",
+  hash: "",
   assign: jest.fn(),
   replace: jest.fn(),
   reload: jest.fn(),
@@ -46,7 +46,7 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-}
+};
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -54,4 +54,4 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-} 
+};
