@@ -1,9 +1,10 @@
-// pages/[brand]/index.tsx - Dynamic Brand Pages
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+// pages/[brand]/index.tsx - Dynamic Brand Pages with SSR
+import React, { useState } from "react";
+import { GetServerSideProps } from "next";
 import ProductCard from "../../src/components/ProductCard";
 import { useCart } from "../../src/hooks/useCart";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 
 interface Brand {
   id: string;
@@ -23,28 +24,145 @@ interface Product {
   brand_id: string;
   inventory_count: number;
   images: string[] | null;
-  brands?: Brand;
+  brands?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
 }
 
-interface ProductsResponse {
+interface BrandPageProps {
+  brand: Brand | null;
   products: Product[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
+  error?: string;
 }
 
-const BrandPage: React.FC = () => {
-  const router = useRouter();
-  const { brand: brandSlug } = router.query;
+// Use service key for server-side operations
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  }
+);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [brand, setBrand] = useState<Brand | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const getServerSideProps: GetServerSideProps<BrandPageProps> = async (context) => {
+  const { brand: brandSlug } = context.params!;
+
+  try {
+    // Validate brand slug
+    if (!brandSlug || typeof brandSlug !== "string") {
+      return {
+        notFound: true,
+      };
+    }
+
+    console.log(`📋 Fetching brand data for slug: ${brandSlug}`);
+
+    // Fetch brand configuration
+    const { data: brand, error: brandError } = await supabase
+      .from("brands")
+      .select("id, name, slug, theme_config")
+      .eq("slug", brandSlug)
+      .single();
+
+    if (brandError || !brand) {
+      console.error("❌ Brand not found:", brandSlug);
+      return {
+        notFound: true,
+      };
+    }
+
+    console.log(`✅ Found brand: ${brand.name}`);
+
+    // Fetch products for this brand
+    const { data: productsData, error: productsError } = await supabase
+      .from("products")
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        brand_id,
+        inventory_count,
+        images,
+        brands (
+          id,
+          name,
+          slug
+        )
+      `)
+      .eq("brand_id", brand.id)
+      .gt("inventory_count", 0)
+      .order("created_at", { ascending: false });
+
+    if (productsError) {
+      console.error("❌ Products fetch error:", productsError.message);
+      return {
+        props: {
+          brand,
+          products: [],
+          error: "Failed to fetch products",
+        },
+      };
+    }
+
+    // Transform the data to match the Product interface
+    const products: Product[] = (productsData || []).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      brand_id: item.brand_id,
+      inventory_count: item.inventory_count,
+      images: item.images,
+      brands: item.brands ? {
+        id: item.brands.id,
+        name: item.brands.name,
+        slug: item.brands.slug
+      } : undefined
+    }));
+
+    console.log(`✅ Found ${products.length} products for ${brand.name}`);
+
+    return {
+      props: {
+        brand,
+        products,
+      },
+    };
+  } catch (error) {
+    console.error("❌ Server-side error:", error);
+    return {
+      props: {
+        brand: null,
+        products: [],
+        error: "Internal server error",
+      },
+    };
+  }
+};
+
+const BrandPage: React.FC<BrandPageProps> = ({ brand, products, error }) => {
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const { cart, addToCart, isLoading: cartLoading } = useCart();
+
+  // Filter products based on search term
+  React.useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchTerm, products]);
 
   // Brand theme colors
   const getBrandColor = (slug: string) => {
@@ -65,55 +183,6 @@ const BrandPage: React.FC = () => {
     return gradientMap[slug] || "from-blue-600 to-indigo-700";
   };
 
-  // Fetch brand info
-  const fetchBrand = async (slug: string) => {
-    try {
-      const response = await fetch("/api/brands");
-      if (!response.ok) {
-        throw new Error("Failed to fetch brands");
-      }
-      const data = await response.json();
-      const foundBrand = data.brands.find((b: Brand) => b.slug === slug);
-
-      if (!foundBrand) {
-        throw new Error("Brand not found");
-      }
-
-      setBrand(foundBrand);
-    } catch (err) {
-      console.error("Error fetching brand:", err);
-      setError("Brand not found");
-    }
-  };
-
-  // Fetch products for this brand
-  const fetchProducts = async (slug: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const params = new URLSearchParams();
-      params.append("brand", slug);
-      if (searchTerm.trim()) {
-        params.append("search", searchTerm.trim());
-      }
-
-      const response = await fetch(`/api/products?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-
-      const data: ProductsResponse = await response.json();
-      setProducts(data.products);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Handle adding to cart
   const handleAddToCart = async (productId: string) => {
     try {
@@ -125,33 +194,6 @@ const BrandPage: React.FC = () => {
     }
   };
 
-  // Fetch data when brand slug changes
-  useEffect(() => {
-    if (brandSlug && typeof brandSlug === "string") {
-      fetchBrand(brandSlug);
-      fetchProducts(brandSlug);
-    }
-  }, [brandSlug]);
-
-  // Re-fetch products when search changes
-  useEffect(() => {
-    if (brandSlug && typeof brandSlug === "string") {
-      fetchProducts(brandSlug);
-    }
-  }, [searchTerm]);
-
-  // Show loading state
-  if (loading && !brand) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Loading brand...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Show error state
   if (error || !brand) {
     return (
@@ -161,7 +203,7 @@ const BrandPage: React.FC = () => {
             Brand Not Found
           </h1>
           <p className="text-gray-600 mb-6">
-            The brand "{brandSlug}" does not exist.
+            The brand you're looking for does not exist.
           </p>
           <Link
             href="/products"
@@ -239,76 +281,64 @@ const BrandPage: React.FC = () => {
         </div>
 
         {/* Products Section */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div
-              className="inline-block animate-spin rounded-full h-8 w-8 border-b-2"
-              style={{ borderColor: brandColor }}
-            ></div>
-            <p className="mt-2 text-gray-600">
-              Loading {brand.name} products...
-            </p>
-          </div>
-        ) : (
-          <div>
-            {/* Results Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {brand.name} Products
-                </h2>
-                <p className="text-gray-600">
-                  {products.length} product{products.length !== 1 ? "s" : ""}{" "}
-                  available
-                  {searchTerm && ` matching "${searchTerm}"`}
-                </p>
-              </div>
-
-              <div
-                className="px-4 py-2 rounded-full text-white font-medium"
-                style={{ backgroundColor: brandColor }}
-              >
-                {brand.name}
-              </div>
+        <div>
+          {/* Results Header */}
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {brand.name} Products
+              </h2>
+              <p className="text-gray-600">
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}{" "}
+                available
+                {searchTerm && ` matching "${searchTerm}"`}
+              </p>
             </div>
 
-            {/* Products Grid */}
-            {products.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="max-w-md mx-auto">
-                  <div className="text-6xl mb-4">🔍</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    No Products Found
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    {searchTerm
-                      ? `No ${brand.name} products match "${searchTerm}"`
-                      : `No ${brand.name} products are currently available`}
-                  </p>
-                  {searchTerm && (
-                    <button
-                      onClick={() => setSearchTerm("")}
-                      className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: brandColor }}
-                    >
-                      Clear Search
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onAddToCart={handleAddToCart}
-                  />
-                ))}
-              </div>
-            )}
+            <div
+              className="px-4 py-2 rounded-full text-white font-medium"
+              style={{ backgroundColor: brandColor }}
+            >
+              {brand.name}
+            </div>
           </div>
-        )}
+
+          {/* Products Grid */}
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Products Found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  {searchTerm
+                    ? `No ${brand.name} products match "${searchTerm}"`
+                    : `No ${brand.name} products are currently available`}
+                </p>
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: brandColor }}
+                  >
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Other Brands CTA */}
         <div className="mt-16 text-center">

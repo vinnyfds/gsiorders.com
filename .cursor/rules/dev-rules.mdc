@@ -223,4 +223,10 @@ If you can't answer these, redesign the approach.
 
 **These rules will dramatically reduce testing failures by catching issues during development rather than testing.**
 
+-------------------------------------------------------------------------
+### Rule T-01 — Terminal Timeout & Recovery
+Enforce 120 s inactivity / 600 s wall-clock timeout on every terminal command using:
+  timeout --preserve-status 600s stdbuf -oL -eL <command>
+Follow Recovery Workflow, Token Efficiency, Memory Ledger, and Escalation steps.
+---
 
