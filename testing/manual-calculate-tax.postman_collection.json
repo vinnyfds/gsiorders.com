@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "Tax Calculation API - Manual Tests",
+    "description": "Manual test collection for /api/calculate-tax endpoint",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Calculate Tax - Florida",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subtotal\": 100,\n  \"state\": \"FL\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Calculate Tax - California",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subtotal\": 50,\n  \"state\": \"CA\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Calculate Tax - Default State",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subtotal\": 75\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Calculate Tax - Decimal Amount",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subtotal\": 99.99,\n  \"state\": \"FL\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Calculate Tax - Invalid Method",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Calculate Tax - Missing Subtotal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"state\": \"FL\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Calculate Tax - Zero Subtotal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subtotal\": 0,\n  \"state\": \"FL\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Calculate Tax - Negative Subtotal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subtotal\": -50,\n  \"state\": \"FL\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/calculate-tax",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "calculate-tax"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+} 

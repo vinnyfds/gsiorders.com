@@ -1,0 +1,276 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🎯 **CURSOR AI RULES FOR GSIORDERS.COM E-COMMERCE PROJECT**
+
+Based on your project files and current status, here are the comprehensive Cursor rules:
+
+## **📁 PROJECT CONTEXT**
+You are working on **gsiorders.com** - a unified e-commerce platform consolidating 3 brands:
+- **Liquid Heaven** (liquidheaven) - Wellness/CBD products
+- **Motaquila** (motaquila) - Premium beverages  
+- **Last Genie** (lastgenie) - Specialty products
+
+**Tech Stack:** Next.js + Supabase + Stripe + Tailwind CSS + TypeScript
+
+---
+
+## **🏗️ FILE STRUCTURE & NAMING**
+
+```
+GSIORDERS.COM/
+├── pages/
+│   ├── api/           # Backend API routes
+│   ├── [brand]/       # Dynamic brand pages
+│   ├── index.js       # Homepage
+│   ├── products.tsx   # All products page
+│   ├── cart.tsx       # Shopping cart page
+│   └── success.tsx    # Payment success
+├── src/
+│   ├── components/    # React components
+│   ├── hooks/         # Custom hooks (useCart.ts)
+│   └── styles/        # CSS files
+├── supabase/          # Database migrations
+└── public/            # Static assets
+```
+
+**RULES:**
+- Use `.tsx` for React components, `.ts` for utilities/hooks
+- API routes go in `pages/api/`
+- All components in `src/components/`
+- Follow existing naming patterns (ProductCard.tsx, useCart.ts)
+
+---
+
+## **🎨 STYLING & CSS RULES**
+
+**PRIMARY APPROACH:** Tailwind CSS with CSS Custom Properties for brand theming
+
+```css
+/* Brand Variables Pattern */
+[data-brand='liquidheaven'] { --brand-primary: #10b981; }
+[data-brand='motaquila']    { --brand-primary: #ec4899; }
+[data-brand='lastgenie']    { --brand-primary: #6366f1; }
+```
+
+**COMPONENT STYLING RULES:**
+1. **Use Tailwind utility classes** for layout and spacing
+2. **Use CSS custom properties** for brand colors: `bg-brand-primary`
+3. **Follow responsive breakpoints:** `sm:` `md:` `lg:` `xl:` `2xl:`
+4. **Include hover states:** `hover:shadow-lg hover:scale-105`
+5. **Add loading states:** `disabled:opacity-50 disabled:cursor-not-allowed`
+
+**REQUIRED CLASSES:**
+```jsx
+// Button Pattern
+className="bg-brand-primary text-white px-6 py-3 rounded-xl hover:bg-brand-accent transition-all disabled:opacity-50"
+
+// Card Pattern  
+className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all"
+
+// Input Pattern
+className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-primary"
+```
+
+---
+
+## **🔧 SUPABASE INTEGRATION RULES**
+
+**ALWAYS use service key for API routes:**
+```typescript
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  }
+);
+```
+
+**RLS PATTERNS:**
+- Tables with user data: Enable RLS with `auth.uid() = user_id` policies
+- Public tables (products, brands): Allow public SELECT
+- Admin operations: Check user role in policies
+
+**QUERY PATTERNS:**
+```typescript
+// Products with brand filtering
+const { data, error } = await supabase
+  .from('products')
+  .select(`
+    id, name, price, images, inventory_count,
+    brands (name, slug)
+  `)
+  .eq('brand_id', brandId)
+  .gt('inventory_count', 0);
+```
+
+---
+
+## **💳 STRIPE INTEGRATION RULES**
+
+**Checkout Session Pattern:**
+```typescript
+const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  line_items: cartItems.map(item => ({
+    price_data: {
+      currency: 'usd',
+      product_data: { name: item.name },
+      unit_amount: Math.round(item.price * 100),
+    },
+    quantity: item.quantity,
+  })),
+  mode: 'payment',
+  success_url: `${req.headers.origin}/success`,
+  cancel_url: `${req.headers.origin}/cancel`,
+  metadata: { user_id: userId }
+});
+```
+
+**Webhook Pattern:**
+```typescript
+const sig = req.headers['stripe-signature'];
+const event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET);
+// Always log webhook events and handle errors gracefully
+```
+
+---
+
+## **🔀 API ROUTE PATTERNS**
+
+**Standard Structure:**
+```typescript
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Method validation
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // Logic here
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error('API Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+```
+
+**Required Endpoints:**
+- `GET /api/products` - Product listing with brand filtering
+- `POST /api/cart` - Add to cart
+- `PUT /api/cart` - Update cart
+- `DELETE /api/cart` - Remove from cart
+- `POST /api/checkout` - Stripe session creation
+- `POST /api/webhook` - Stripe webhook handler
+
+---
+
+## **⚛️ COMPONENT RULES**
+
+**React Component Pattern:**
+```typescript
+interface ProductCardProps {
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    images: string[] | null;
+    inventory_count: number;
+    brands?: { name: string; slug: string };
+  };
+  onAddToCart?: (productId: string) => void;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+  // Component logic
+  return (
+    <div className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all">
+      {/* Component JSX */}
+    </div>
+  );
+};
+
+export default ProductCard;
+```
+
+**ALWAYS INCLUDE:**
+- Loading states with skeleton UI
+- Error handling with user feedback
+- Accessibility attributes (alt text, ARIA labels)
+- Mobile-responsive design
+- TypeScript interfaces
+
+---
+
+## **🛡️ SECURITY RULES**
+
+1. **Environment Variables:** Never expose secrets in frontend
+2. **User Authentication:** Use test UUID `123e4567-e89b-12d3-a456-426614174000` for development
+3. **Input Validation:** Validate all API inputs
+4. **SQL Injection:** Always use Supabase parameterized queries
+5. **CORS:** Only allow necessary origins
+
+---
+
+## **🎯 BRAND-SPECIFIC RULES**
+
+**Brand Routing:**
+- `/liquidheaven` → Liquid Heaven products
+- `/motaquila` → Motaquila products  
+- `/lastgenie` → Last Genie products
+
+**Brand Theming:**
+```typescript
+const getBrandTheme = (brandSlug: string) => ({
+  liquidheaven: { primary: '#10b981', gradient: 'from-emerald-500 to-emerald-600' },
+  motaquila: { primary: '#ec4899', gradient: 'from-pink-500 to-pink-600' },
+  lastgenie: { primary: '#6366f1', gradient: 'from-indigo-500 to-indigo-600' }
+}[brandSlug]);
+```
+
+---
+
+## **📱 RESPONSIVE DESIGN RULES**
+
+**Breakpoint Strategy:**
+- Mobile-first approach
+- Test on: 375px (mobile), 768px (tablet), 1024px (desktop)
+- Use: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`
+
+**Performance Rules:**
+- Optimize images: Use Next.js `Image` component
+- Lazy load: Product grids and non-critical components
+- Bundle size: Keep vendor bundles under 250KB
+
+---
+
+## **🚨 ERROR HANDLING RULES**
+
+**API Errors:**
+```typescript
+if (error) {
+  console.error('Database error:', error);
+  return res.status(500).json({ 
+    error: 'Failed to fetch products',
+    message: process.env.NODE_ENV === 'development' ? error.message : undefined
+  });
+}
+```
+
+**Frontend Errors:**
+- Show user-friendly messages
+- Provide retry mechanisms
+- Log errors for debugging
+
+---
+
+**✅ FOLLOW THESE RULES TO MAINTAIN CODE CONSISTENCY AND QUALITY!**
+

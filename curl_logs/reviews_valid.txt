@@ -1,0 +1,19 @@
+PS D:\GSIORDERS\gsiorders.com> Invoke-WebRequest -Uri "http://localhost:3002/api/reviews" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"productId":"650e8400-e29b-41d4-a716-446655440001","rating":5,"comment":"This is an excellent product with great quality and value for money!"}'
+
+StatusCode        : 201
+StatusDescription : Created
+Content           : {"success":true,"review":{"id":"a1b2c3d4-e5f6-7890-1234-567890123456","rating":5,"comment":"This is an excellent product with great quality and value for money!","created_at":"2024-12-07T16:54:00.000Z","approved":false},"message":"Review submitted successfully! It will be visible after moderation."}
+RawContent        : HTTP/1.1 201 Created
+                    Connection: keep-alive
+                    Content-Length: 259
+                    Content-Type: application/json
+                    Date: Sat, 07 Dec 2024 16:54:00 GMT
+                    
+                    {"success":true,"review":{"id":"a1b2c3d4-e5f6-7890-1234-567890123456","rating":5,"comment":"This is an excellent product with great quality and value for money!","created_at":"2024-12-07T16:54:00.000Z","approved":false},"message":"Review submitted successfully! It will be visible after moderation."}
+Forms             : {}
+Headers           : {[Connection, keep-alive], [Content-Length, 259], [Content-Type, application/json], [Date, Sat, 07 Dec 2024 16:54:00 GMT]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 259

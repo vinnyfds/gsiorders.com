@@ -1,0 +1,160 @@
+@import "https://cdn.tailwindcss.com";
+
+/* CSS Custom Properties for Brand Theming */
+:root {
+  --brand-primary: #3b82f6;
+  --brand-secondary: #64748b;
+  --brand-accent: #8b5cf6;
+  --brand-success: #10b981;
+  --brand-warning: #f59e0b;
+  --brand-error: #ef4444;
+}
+
+/* Brand-specific theming */
+[data-brand="liquidheaven"] {
+  --brand-primary: #10b981;
+  --brand-gradient: linear-gradient(135deg, #10b981, #059669);
+}
+[data-brand="motaquila"] {
+  --brand-primary: #ec4899;
+  --brand-gradient: linear-gradient(135deg, #ec4899, #db2777);
+}
+[data-brand="lastgenie"] {
+  --brand-primary: #6366f1;
+  --brand-gradient: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+/* Base body styling */
+body {
+  background-color: #f3f4f6;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* Typography System */
+.heading-1 {
+  @apply text-4xl sm:text-5xl lg:text-6xl font-bold;
+}
+.heading-2 {
+  @apply text-3xl sm:text-4xl font-semibold;
+}
+.heading-3 {
+  @apply text-2xl font-semibold;
+}
+.body-lg {
+  @apply text-lg leading-relaxed;
+}
+.body-base {
+  @apply text-base leading-normal;
+}
+.body-sm {
+  @apply text-sm leading-tight;
+}
+
+/* Button System */
+.btn-primary {
+  @apply bg-blue-600 text-white font-medium px-5 py-3 rounded-xl transition;
+  @apply hover:bg-blue-700 hover:shadow-lg;
+  @apply active:scale-95;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-800 font-medium px-5 py-3 rounded-xl transition;
+  @apply hover:bg-gray-200 hover:shadow-md;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400;
+}
+
+/* Form System */
+.input-base {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-300 bg-white shadow-sm transition;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.input-error {
+  @apply border-red-500 bg-red-50 text-red-900 placeholder-red-400;
+  @apply focus:ring-red-500 focus:border-red-500;
+}
+
+/* Product Card System */
+.product-card {
+  @apply bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl hover:scale-105 transition-all duration-300;
+  @apply group relative cursor-pointer;
+}
+
+.product-image {
+  @apply aspect-square w-full rounded-xl object-cover transition-all duration-300;
+  @apply group-hover:brightness-110;
+}
+
+.product-overlay {
+  @apply absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300;
+}
+
+/* Cart System */
+.cart-modal {
+  @apply fixed inset-0 z-50 overflow-y-auto;
+}
+.cart-backdrop {
+  @apply fixed inset-0 bg-black/60 backdrop-blur-sm;
+}
+.cart-content {
+  @apply relative bg-white rounded-t-2xl md:rounded-2xl max-w-2xl mx-auto mt-auto md:mt-20;
+  @apply animate-slide-up;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Loading States */
+.loading-skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+.skeleton-text {
+  @apply h-4 w-full bg-gray-200 rounded animate-pulse;
+}
+.skeleton-text-lg {
+  @apply h-6 w-3/4 bg-gray-200 rounded animate-pulse;
+}
+
+/* Utility States */
+.empty-state {
+  @apply text-center py-12 text-gray-500;
+}
+.error-state {
+  @apply border-red-500 bg-red-50 text-red-900;
+}

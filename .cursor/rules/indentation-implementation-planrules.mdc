@@ -1,0 +1,322 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🚨 **CRITICAL MISSING RULES - INDENTATION & IMPLEMENTATION PLAN**
+
+
+
+---
+
+## **📐 CODE FORMATTING & INDENTATION RULES**
+
+### **Indentation Standards**
+```typescript
+// ALWAYS use 2 spaces for indentation (NO TABS)
+const MyComponent: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  
+  const handleClick = async () => {
+    try {
+      setLoading(true);
+      const result = await apiCall();
+      if (result.success) {
+        console.log('Success');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="container">
+      <button 
+        onClick={handleClick}
+        disabled={loading}
+        className={`
+          px-4 py-2 rounded-lg
+          ${loading ? 'opacity-50' : 'hover:bg-blue-600'}
+        `}
+      >
+        {loading ? 'Loading...' : 'Click Me'}
+      </button>
+    </div>
+  );
+};
+```
+
+### **JSX Formatting Rules**
+```jsx
+// Multi-line props: Each prop on new line, closing bracket aligned
+<ProductCard
+  product={product}
+  onAddToCart={handleAddToCart}
+  className="mb-4"
+  data-testid="product-card"
+/>
+
+// Single line if 3 props or less
+<Button onClick={handleClick} disabled={loading} />
+
+// Conditional classes: Use template literals with proper indentation
+className={`
+  base-styles here
+  ${condition ? 'conditional-class' : 'default-class'}
+  ${anotherCondition && 'another-conditional-class'}
+`}
+```
+
+### **Import Organization**
+```typescript
+// 1. React/Next.js imports
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+
+// 2. Third-party libraries
+import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
+
+// 3. Internal components/hooks
+import ProductCard from '../components/ProductCard';
+import { useCart } from '../hooks/useCart';
+
+// 4. Types
+import type { Product, CartItem } from '../types';
+```
+
+---
+
+## **📋 IMPLEMENTATION PLAN EXECUTION RULES**
+
+### **MANDATORY: Follow Microtask Order**
+
+**PHASE 1: Infrastructure (Complete these FIRST)**
+```bash
+# Task 1.1: Initialize Supabase Project ✅ DONE
+# Task 1.2: Apply SQL Schema ✅ DONE  
+# Task 1.3: Configure Supabase Storage ✅ DONE
+# Task 1.4: Search Index Setup ✅ DONE
+# Task 1.5: Seed Brand Data ✅ DONE
+# Task 1.6: Create .env Configuration ✅ DONE
+```
+
+**PHASE 2: Frontend Components (Current Focus)**
+```typescript
+// Task 2.1: ProductCard.tsx ✅ DONE
+// Task 2.2: CartModal.tsx - NEXT PRIORITY
+// Task 2.3: WishlistButton.tsx  
+// Task 2.4: ReviewForm.tsx
+// Task 2.5: SearchBar.tsx
+// Task 2.6: BrandFilterBar.tsx
+// Task 2.7: InventoryManager.tsx
+// Task 2.8: AdminDashboard.tsx
+```
+
+### **Microtask Execution Pattern**
+```typescript
+/**
+ * RULE: Before starting ANY component, check:
+ * 1. Dependencies completed? (from implementation plan)
+ * 2. Success criteria defined?
+ * 3. Time estimate reasonable?
+ * 4. Required props/state documented?
+ */
+
+// Example: Task 2.2 CartModal.tsx
+// Dependencies: ProductCard ✅, useCart hook ✅
+// Time Estimate: 2 hrs
+// Success Criteria: Shows cart items, quantity controls, checkout button
+// Props: none (uses useCart hook)
+// State: cartItems via useCart
+```
+
+---
+
+## **🎯 TASK COMPLETION VALIDATION RULES**
+
+### **Success Criteria Checklist (Per Task)**
+```typescript
+// For EVERY component/feature, validate:
+const taskValidation = {
+  // 1. Functional Requirements
+  functionalComplete: boolean,    // Does it work as specified?
+  propsImplemented: boolean,      // All required props handled?
+  stateManaged: boolean,         // State properly managed?
+  
+  // 2. Technical Requirements  
+  typescriptTypes: boolean,      // TypeScript interfaces defined?
+  errorHandling: boolean,        // Try/catch blocks added?
+  loadingStates: boolean,        // Loading UI implemented?
+  
+  // 3. Design Requirements
+  tailwindStyling: boolean,      // Follows CSS guide?
+  responsiveDesign: boolean,     // Mobile/desktop tested?
+  brandTheming: boolean,         // Works with all 3 brands?
+  
+  // 4. Testing Requirements
+  dataTestIds: boolean,          // Test attributes added?
+  accessibilityCompliant: boolean, // ARIA labels, alt text?
+  errorBoundaries: boolean       // Graceful error handling?
+};
+```
+
+### **Dependency Chain Validation**
+```typescript
+// NEVER start a task until dependencies are complete
+const dependencyRules = {
+  'CartModal.tsx': ['ProductCard.tsx', 'useCart.ts', '/api/cart'],
+  'ReviewForm.tsx': ['/api/reviews', 'authentication system'],
+  'AdminDashboard.tsx': ['/api/admin/dashboard', 'admin auth'],
+  'CheckoutFlow': ['CartModal.tsx', '/api/checkout', 'Stripe setup']
+};
+
+// Check before starting any task
+const validateDependencies = (taskName: string) => {
+  const deps = dependencyRules[taskName] || [];
+  return deps.every(dep => isCompleted(dep));
+};
+```
+
+---
+
+## **📊 PROGRESS TRACKING RULES**
+
+### **Task Status Documentation**
+```typescript
+// ALWAYS update task status in comments
+/**
+ * TASK STATUS: CartModal.tsx
+ * ✅ Started: 2025-01-05 10:00
+ * ✅ Props defined: 2025-01-05 10:15  
+ * ✅ Basic structure: 2025-01-05 10:30
+ * ✅ Cart integration: 2025-01-05 11:00
+ * ⏳ Checkout button: IN PROGRESS
+ * ❌ Testing: NOT STARTED
+ * ❌ Mobile responsive: NOT STARTED
+ */
+```
+
+### **Blockers & Issues Tracking**
+```typescript
+// Document any blockers immediately
+/**
+ * BLOCKERS FOUND:
+ * 🚫 Issue: Stripe checkout session undefined
+ * 📍 Location: CartModal.tsx line 45
+ * 🔧 Solution: Add null check and error handling
+ * ⏰ Time Impact: +30 mins
+ * 📋 Next Steps: Implement fallback UI
+ */
+```
+
+---
+
+## **🔄 ITERATION & REFINEMENT RULES**
+
+### **Code Review Checklist (Self-Review)**
+```typescript
+// Before marking task "complete", verify:
+const selfReviewChecklist = [
+  'Code follows 2-space indentation',
+  'TypeScript types are properly defined', 
+  'Error handling implemented',
+  'Loading states added',
+  'Mobile responsive design',
+  'Data-testid attributes added',
+  'Follows brand theming system',
+  'Dependencies satisfied',
+  'Success criteria met',
+  'No console.log statements left',
+  'Comments explain complex logic'
+];
+```
+
+### **Refactoring Rules**
+```typescript
+// When refactoring existing code:
+// 1. Keep original functionality intact
+// 2. Improve code structure/readability
+// 3. Add missing TypeScript types
+// 4. Update tests if needed
+// 5. Maintain backward compatibility
+
+// Example refactor pattern:
+// BEFORE: Inline styles and logic
+// AFTER: Extracted components and hooks
+```
+
+---
+
+## **⚡ PRODUCTIVITY RULES**
+
+### **Time Boxing & Focus**
+```typescript
+// STRICT time management per microtask:
+const timeBoxRules = {
+  'simple-component': '1-2 hours max',
+  'complex-component': '3-4 hours max', 
+  'api-endpoint': '1-2 hours max',
+  'integration-task': '2-3 hours max'
+};
+
+// If exceeding time estimate:
+// 1. Document the blocker
+// 2. Simplify the scope  
+// 3. Move advanced features to next iteration
+// 4. Focus on MVP functionality first
+```
+
+### **Commit Message Rules**
+```bash
+# Follow conventional commits:
+git commit -m "feat(cart): add CartModal component with quantity controls"
+git commit -m "fix(api): handle undefined product in cart endpoint"  
+git commit -m "style(product): improve mobile responsive layout"
+git commit -m "test(cart): add unit tests for cart operations"
+
+# Prefixes: feat, fix, style, test, refactor, docs
+```
+
+---
+
+## **🎯 CURRENT TASK PRIORITY ORDER**
+
+```typescript
+/**
+ * IMMEDIATE NEXT TASKS (Follow this exact order):
+ * 
+ * 1. Task 2.2: CartModal.tsx
+ *    - Dependencies: ✅ useCart.ts, ✅ ProductCard.tsx  
+ *    - Time: 2 hrs
+ *    - Success: Modal shows cart, quantity controls, checkout button
+ * 
+ * 2. Task 3.5: /api/checkout (Stripe integration)
+ *    - Dependencies: ✅ Stripe keys, ✅ CartModal
+ *    - Time: 1 hr  
+ *    - Success: Creates Stripe session, returns checkout URL
+ * 
+ * 3. Task 3.6: /api/webhooks/stripe  
+ *    - Dependencies: ✅ /api/checkout
+ *    - Time: 2 hrs
+ *    - Success: Creates order, updates inventory, sends email
+ */
+```
+
+---
+
+**✅ COMPLETE CURSOR AI RULES NOW INCLUDE:**
+- [x] **2-space indentation standards**
+- [x] **JSX formatting rules**  
+- [x] **Import organization**
+- [x] **Microtask execution order**
+- [x] **Dependency validation**
+- [x] **Success criteria checklists**
+- [x] **Progress tracking requirements**
+- [x] **Time boxing rules**
+- [x] **Commit message standards**
+- [x] **Current task priorities**
+
+
