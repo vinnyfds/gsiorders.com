@@ -39,16 +39,13 @@ interface QuoteResponse {
 
 // Defense-first validation function
 const validateQuoteRequest = (body: any): QuoteRequest => {
-  if (body === undefined || body === null || typeof body !== 'object') {
-    throw new Error('Request body is required');
-  }
-
-  if (!Array.isArray(body.items) || body.items.length === 0) {
-    throw new Error('At least one item is required');
-  }
+  if (body === undefined || body === null) throw new Error('Request body is required');
+  if (!('items' in body)) throw new Error('Request body is required');
+  const { items } = body;
+  if (!Array.isArray(items) || items.length === 0) throw new Error('At least one item is required');
 
   // Validate each item
-  body.items.forEach((item: any, index: number) => {
+  items.forEach((item: any, index: number) => {
     if (!item.product_id || typeof item.product_id !== 'string') {
       throw new Error(`Item ${index + 1}: product_id is required and must be a string`);
     }
@@ -94,9 +91,22 @@ const verifyProductsExist = async (items: QuoteItem[]): Promise<void> => {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Method validation
   if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      error: 'method_not_allowed', 
-      message: 'Only POST method is allowed' 
+    return res.status(405).json({ error: 'method_not_allowed', message: 'Method not allowed' });
+  }
+
+  // Check for missing body
+  if (!req.body) {
+    return res.status(400).json({ error: 'validation_error', message: 'Request body is required' });
+  }
+
+  let quoteRequest;
+  try {
+    quoteRequest = validateQuoteRequest(req.body);
+  } catch (validationError) {
+    console.error('Validation error:', validationError);
+    return res.status(400).json({ 
+      error: 'validation_error', 
+      message: validationError instanceof Error ? validationError.message : 'Invalid request body'
     });
   }
 
@@ -111,44 +121,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Validate request body
-    let quoteRequest: QuoteRequest;
-    try {
-      quoteRequest = validateQuoteRequest(req.body);
-    } catch (validationError) {
-      console.error('Validation error:', validationError);
-      return res.status(400).json({ 
-        error: 'validation_error', 
-        message: validationError instanceof Error ? validationError.message : 'Invalid request body' 
-      });
-    }
-
-    // Extract product IDs for validation
-    const productIds = quoteRequest.items.map(item => item.product_id);
-
     // Fetch products
-    const { data: products, error: productsError } = await supabase
+    const { data: products, error: productError } = await supabase
       .from('products')
-      .select('id, name, inventory_count, price')
-      .in('id', productIds);
+      .select('id, name, price, inventory_count')
+      .in('id', quoteRequest.items.map(i => i.product_id));
 
-    // Check for DB error first
-    if (productsError) {
-      console.error('Database error fetching products:', productsError);
-      return res.status(500).json({ 
-        error: 'internal', 
-        message: 'Database error while fetching products' 
-      });
+    if (productError) {
+      return res.status(500).json({ error: 'internal', message: 'Database error while fetching products' });
     }
-
-    // Check if all products were found
-    if (!products || products.length !== productIds.length) {
-      const foundIds = products?.map(p => p.id) || [];
-      const missingIds = productIds.filter(id => !foundIds.includes(id));
-      return res.status(404).json({ 
-        error: 'not_found', 
-        message: `Product(s) not found: ${missingIds.join(', ')}` 
-      });
+    if (!products || products.length !== quoteRequest.items.length) {
+      const foundIds = products ? products.map(p => p.id) : [];
+      const missing = quoteRequest.items.filter(i => !foundIds.includes(i.product_id)).map(i => i.product_id);
+      return res.status(404).json({ error: 'not_found', message: `Product(s) not found: ${missing.join(', ')}` });
     }
 
     // Check inventory availability only if all products found
@@ -170,7 +155,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }, 0);
 
     // Insert quote request into database
-    const { data: quote, error: insertError } = await supabase
+    const { data: quote, error: quoteError } = await supabase
       .from('quotes')
       .insert({
         user_id: user.id,
@@ -186,13 +171,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .select()
       .single();
 
-    // Check for DB error on insert
-    if (insertError) {
-      console.error('Database error inserting quote:', insertError);
-      return res.status(500).json({ 
-        error: 'internal', 
-        message: 'Database error while creating quote request' 
-      });
+    if (quoteError) {
+      return res.status(500).json({ error: 'internal', message: 'Database error while creating quote request' });
+    }
+    if (!quote) {
+      return res.status(500).json({ error: 'internal', message: 'Failed to create quote request' });
     }
 
     // Log successful quote request for monitoring
