@@ -5,9 +5,10 @@ module.exports = {
   testMatch: ["**/__tests__/api/*.spec.ts"],
 
   collectCoverage: true,
-  collectCoverageFrom: ["pages/api/{reviews,wishlist}.ts"],
+  collectCoverageFrom: ["pages/api/{reviews,wishlist,health}.ts"],
   coverageThreshold: {
     "pages/api/reviews.ts":  { statements: 80, branches: 80 },
-    "pages/api/wishlist.ts": { statements: 80, branches: 80 }
+    "pages/api/wishlist.ts": { statements: 80, branches: 80 },
+    "pages/api/health.ts":   { statements: 80, branches: 80 }
   }
 }; 

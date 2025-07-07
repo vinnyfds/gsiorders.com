@@ -14,6 +14,7 @@
 
 - **2025-01-06_cart-checkout-coverage.md** - Cart API coverage below 80% threshold, enhanced test suite to achieve 89.77% statements and 87.93% branches
 - [2025-01-06_e2e-setup.md](problems/2025-01-06_e2e-setup.md) — Playwright E2E setup, selector, and redirect issues
+- 2025-07-07_health-ci-smoke.md — Health endpoint, smoke test, CI gate
 
 ## Commands
 
@@ -22,6 +23,7 @@
 - **2025-01-06_cart-checkout-coverage.sh** - Commands for cart and checkout coverage testing and commit
 - [2025-01-06_e2e-setup.sh](commands/2025-01-06_e2e-setup.sh) — All Playwright E2E setup and test commands
 - **2025-01-06_env_template_ci_integration.sh** - Commands for environment template and CI integration documentation
+- commands/2025-07-07_health-ci-smoke.sh — All CLI for health endpoint, smoke, CI
 
 ## Resources
 
