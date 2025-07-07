@@ -1,0 +1,39 @@
+---
+alwaysApply: false
+---
+# R-22 Jest & Supabase Testing Standard
+• Use jest + ts-jest preset from cursor_memory/snippets.
+• Keep ≥80 % statements & branches for each touched file (per-file threshold).
+• Re-use golden Supabase mock (__mocks__/@supabase-supabase-js.ts); never inline new jest.fn chains.
+
+# R-23 Problem-Solution Knowledge Log
+After a green test run:
+1. Write cursor_memory/problems/YYYY-MM-DD_<task>.md with ## Problem / ## Solution.
+2. Append link in cursor_memory/INDEX.md.
+3. Add CLI commands to cursor_memory/commands.
+
+# R-24 Command-History Ledger (P-15)
+Log every CLI command used in a task to the matching commands file before push.
+
+# R-25 Branch & Commit Style
+• Feature branches:  feat/<scope>/<slug>
+• Bugfix branches:   fix/<scope>/<slug>
+• Commit messages must follow Conventional Commits (see U-05).
+
+# R-26 ESLint Gate
+Run `npm run lint -- --fix` before tests; CI must pass lint.
+
+# R-27 Playwright E2E Setup
+• E2E tests run with Playwright (`npm run test:e2e`).
+• Env vars loaded from e2e/.env.e2e (no secrets).
+• Mock backend calls with MSW; no live Supabase/Stripe in CI.
+
+# R-28 No TODOs Without Issue
+If Cursor inserts a // TODO, it must also reference an existing GitHub issue or create one.
+
+# R-29 API Security Checklist
+For every new API route, validate:
+1. Auth required?
+2. Input schema validated?
+3. Error messages sanitized?
+Document the answers in the PR description.

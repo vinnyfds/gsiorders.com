@@ -1,0 +1,159 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+### 📜 **Cursor AI Problem-Solving Rulebook — gsiorders.com**
+
+> *Purpose: give every Cursor AI prompt, agent and micro-task a single, repeatable playbook for turning requirements into high-quality code and documentation for the new multi-brand e-commerce site.*
+> *Inspired by the 9-rule intelligence framework you shared*&#x20;
+
+---
+
+#### 🗂️ Pre-Execution Checklist (“Gate 0”)
+
+| Check                      | Why it matters            | How to satisfy                                                                      |
+| -------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| **Docs loaded?**           | Avoid context gaps        | Import latest *FRD, SRD, TRD* & *Implementation Plan* into the agent’s memory.      |
+| **Environment set?**       | Prevent path / key errors | Confirm working dir = project root, `.env` variables present, 4-space indents only. |
+| **Task scoped?**           | Stop scope creep          | Restate the micro-task in ≤ 2 sentences; flag ambiguities for the user.             |
+| **Dependencies resolved?** | Maintain build order      | Cross-check `CursorAI_Microtasks…md` dependency map; enqueue blockers first.        |
+
+Proceed only if every box is ✅.
+If any ❌ → stop, ask clarifying question, or create a “Prep” micro-task.
+
+---
+
+#### 🔟 Core Rules (P-01 → P-10)
+
+| #                                  | Rule                                                                                                                                                    | Cursor AI must…                                                          | Typical outputs |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------- |
+| **P-01 Systematic Decomposition**  | break the problem into *Feature → Component → Function → Edge cases*.                                                                                   | A bullet list of sub-tasks or TODO comments in code.                     |                 |
+| **P-02 Context Alignment**         | cross-reference FRD/SRD/TRD + test plan before writing code; cite doc sections by heading.                                                              | Inline `// ref: SRD §4.3` comments; no “magic” assumptions.              |                 |
+| **P-03 Architecture Consistency**  | ensure choices match the approved stack:<br>React + Tailwind (V0.dev), Supabase, Stripe, AWS.                                                           | Correct imports, bucket names, env keys.                                 |                 |
+| **P-04 Validation First**          | write unit / API tests (or Cypress spec) *before* implementation stubs when feasible (“TDD-lite”).                                                      | `ProductCard.test.tsx`, Postman collection etc.                          |                 |
+| **P-05 Multi-Layer Quality Gates** | run *syntax → type → lint → business* checks inside the prompt; fix before returning.                                                                   | Compile logs, ESLint output, schema comparison notes.                    |                 |
+| **P-06 Proactive Risk Prevention** | anticipate RLS, webhook, race-condition and performance risks; document the guard-rails.                                                                | Comment blocks: “// RLS: only service\_role can insert”.                 |                 |
+| **P-07 Confidence Scoring**        | attach a 0-1 self-confidence value with factors (e.g. novel code path, reused pattern).                                                                 | JSON snippet `{confidence:0.82, factors:['reused code','new query']}`.   |                 |
+| **P-08 Continuous Learning**       | store any “pattern worth reusing” (e.g. signed-URL upload) in `/utils/patterns.md`; reference it next time.                                             | Appended markdown pattern entry.                                         |                 |
+| **P-09 Loop & Drift Detection**    | if a task repeats or output diverges from docs, raise a “drift alert” and propose a fix.                                                                | Chat note: “⚠ drift between schema v2.1 and code — recommend migration.” |                 |
+| **P-10 Execution Report**          | after each micro-task, output a mini-report (`### Cursor AI Report`) listing: files touched, tests added, validation results, next dependency unlocked. | Markdown block pasted into ChatGPT for traceability.    
+
+                 |                 |
+
+---
+
+### 🔧 **Add-On Rules for Truthful Verification & Controlled GitHub Push**
+
+> These rules extend the *Cursor AI Problem-Solving Rulebook — gsiorders.com* you approved earlier. Append them directly under the existing **P-10 Execution Report** section and reference them in the standard prompt footer.
+
+| #                                   | Rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Cursor AI must…                                                                                                                                                                 | Typical outputs |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| **P-11 Manual-Test Proof**          | After all automated tests pass, expose a **live, user-verifiable endpoint or artefact** and include its link in the Execution Report. <br><br>Acceptable proof mechanisms (choose 1):<br>1. **Frontend/UX** – spin up `npm run preview` (Vite) over an `ngrok` tunnel and return the URL.<br>2. **API/Backend** – deploy a preview branch to Supabase’s *Branch Deploy* or Render’s preview env and share the HTTPS endpoint.<br>3. **Postman / cURL collection** – export a collection (JSON) to `/testing/manual-<task>.postman_collection.json` and give a “Download” link.<br><br>*Never claim success without at least one of these links.* | In `### Cursor AI Report` add:<br>`ManualTestLink: https://<unique-preview>.ngrok.io`<br>`ProofArtifact: sandbox:/mnt/data/manual-checkout_session.postman_collection.json`     |                 |
+| **P-12 Confirm-then-Push Workflow** | **Do not push to `origin` by default.**<br>1. Commit changes locally in a feature branch `feat/<task-slug>`.<br>2. Present the commit hash + brief diff stats in the Execution Report.<br>3. Wait for a user message starting with **“CONFIRMED:”** that manual tests passed.<br>4. Upon confirmation, run:<br>`git push -u origin feat/<task-slug>`<br>`gh pr create --fill` (or REST call) to open a PR targeting `develop`.<br>5. Append the PR URL to the chat.                                                                                                                                                                              | Execution Report field:<br>`LocalCommit: 7c9e1b2 (±8 files / +214 -57)`<br>*After user confirmation* → bot replies:<br>`Pushed: https://github.com/<org>/gsiorders.com/pull/42` |                 |
+
+#### 📥 **Prompt Footer Addendum**
+
+Add these two bullets to the standard footer used in every micro-task prompt:
+
+```
+- Apply P-11 Manual-Test Proof (provide a live link or downloadable artefact).
+- Apply P-12 Confirm-then-Push: wait for “CONFIRMED:” before pushing to GitHub.
+```
+
+---
+
+**Result:** Cursor AI can no longer “claim” a fix; the user always gets a hands-on link to verify, and code reaches GitHub only after explicit approval.
+
+---
+
+### ➕ **New Rule — P-13 Token-Efficiency**
+
+> *Goal: minimize token usage (and cost) while still meeting quality gates.*
+
+| #                         | Rule                                                                        | Cursor AI must…                                                                                                                                                                                                                                                                                                                                                                                                                     | Practical tips |
+| ------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| **P-13 Token-Efficiency** | Keep every response as short as possible **without losing essential info**. | • Return **only** the artifacts (code / schema / test) and the required `### Cursor AI Report`.<br>• Omit long prose explanations, repeat links instead of re-pasting blocks.<br>• Use terse in-code comments (≤ 60 chars each).<br>• Reference common boilerplate with `// see patterns.md §X` rather than duplicating.<br>• Skip banner art, ASCII, or decorative markdown.<br>• Prefer bullet points over paragraphs in reports. |                |
+
+---
+
+### 📚 **New Rule — P-14 Project Memory Ledger**
+
+> *Goal: give Cursor AI a durable, self-updating knowledge base so each micro-task “remembers” past decisions, patterns, and pitfalls.*
+
+| #                              | Rule                                       | Cursor AI must…                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Implementation details |
+| ------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| **P-14 Project Memory Ledger** | Persist collective learning between tasks. | 1. **Folder:** create (if absent) `/cursor_memory` at project root.  <br>2. **File per task:** after completing a micro-task, append a markdown file `YYYY-MM-DD_<task-slug>.md` containing:  <br> • Task summary (≤ 3 lines)  <br> • Key decisions / patterns  <br> • Risks & fixes  <br> • Links (test proof, PR)  <br>3. **Index:** maintain `/cursor_memory/INDEX.md` — a bullet list of files with one-line summaries.  <br>4. **Pre-task read:** at Gate 0, parse `INDEX.md` and ingest any file touched by the components you’re about to modify (regex match on file paths / component names).  <br>5. **De-dupe:** if a decision already exists, reference it — don’t rewrite. |                        |
+
+---
+
+#### 📥 **Add to Standard Prompt Footer**
+
+```
+- Apply P-14 Project Memory Ledger: update /cursor_memory after success; read INDEX.md before coding.
+```
+
+---
+
+**Outcome:** Cursor AI now carries forward hard-won lessons automatically, reducing regressions and repeated questions across the entire gsiorders.com build.
+
+
+---
+#### 📥 **Add to Standard Prompt Footer**
+
+Append this bullet to the footer used in every micro-task prompt:
+
+```
+- Apply P-13 Token-Efficiency: output only what is strictly required; no extra narrative.
+```
+
+---
+
+**Effect:** Cursor AI now guards against unnecessary token spend while still producing the code, test link, and concise report needed for gsiorders.com.
+
+------------------------------------------------------------------------------------------------
+
+### ➕ **New Rule — P-15 Command-History Ledger**
+
+> *Goal: guarantee each micro-task **remembers every shell / CLI command** it executed to validate a result, so later tasks (and humans) can replay, debug, or extend them.*
+
+| #                               | Rule                                                                               | Cursor AI must…                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Implementation details                                                                                                                                                                                                                                        |
+| ------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P-15 Command-History Ledger** | Persist every command (and its intent) that was typed or scripted during the task. | 1. **Log immediately:**<br>  • Capture each command string at the moment it is shown in the prompt or executed in a script.<br>  • Prepend a terse comment (`# purpose …`, ≤ 8 words).<br>2. **Store per-task script:**<br>  • After finishing the task, append the collected commands to `/cursor_memory/commands/YYYY-MM-DD_<task-slug>.sh`.<br>  • If the file already exists, de-dupe identical commands.<br>3. **Index update:** add the script path to `/cursor_memory/INDEX.md` under a “Commands” sub-section (re-use **P-14 Project Memory Ledger** indexing pattern).<br>4. **Pre-task recall:** before running any new command, scan previous command scripts for a match; **reuse** the exact command when possible instead of inventing a new variant.<br>5. **Report link:** in every `### Cursor AI Report`, include `CommandScript: /cursor_memory/commands/YYYY-MM-DD_<task-slug>.sh`. | • **Token-efficient:** store commands as plain text; no extra narrative.<br>• **Cross-OS:** use POSIX-style syntax where possible; when PowerShell is required, prefix `# pwsh`.<br>• **Security:** redact secrets (`$SUPABASE_SERVICE_KEY` ⇒ `$ENV_SECRET`). |
+
+#### 📥 **Add to Standard Prompt Footer**
+
+```
+- Apply P-15 Command-History Ledger: log every CLI command to /cursor_memory/commands and reference it in the report.
+```
+
+This dovetails with the existing **P-14 Project Memory Ledger** folder structure and keeps command knowledge durable across all future Cursor AI micro-tasks .
+
+
+---
+#### ⚙️ Standard Prompt Footer (attach to *every* Cursor AI task)
+
+```
+### Cursor AI Rule Footer
+- Apply P-01 … P-10 above.
+- Follow Gate 0 checklist.
+- Use exactly 4-space indentation.
+- On success, output “### Cursor AI Report” with:
+  • Files created/updated
+  • Tests written & status
+  • Confidence score
+  • Next tasks unblocked
+  • Any risks or open questions
+```
+
+---
+
+#### 📈 Success Metric
+
+> **A micro-task passes when** its Cursor AI Report shows *all* quality gates green **and** the code runs `npm test && supabase db lint` without error.
+
+---
+
+
+
+

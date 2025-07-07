@@ -1,0 +1,410 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🚨 **CRITICAL MISSING: TASK-SPECIFIC TESTING RULES**
+
+
+---
+
+## **🧪 TESTING RULES PER IMPLEMENTATION PLAN TASK**
+
+### **GOAL 1: Infrastructure Testing Requirements**
+
+```typescript
+// Task 1.1: Initialize Supabase Project
+const testInfrastructure = {
+  validation: [
+    'supabase start command works',
+    'Database connection established', 
+    'Environment variables loaded',
+    'CLI responds without errors'
+  ],
+  testCommand: 'supabase status',
+  successCriteria: 'All services show "RUNNING" status'
+};
+
+// Task 1.2: Apply SQL Schema  
+const testDatabaseSchema = {
+  validation: [
+    'All tables created successfully',
+    'Foreign key relationships work',
+    'Indexes are properly created',
+    'ENUM types are defined'
+  ],
+  testQuery: `
+    SELECT table_name FROM information_schema.tables 
+    WHERE table_schema = 'public';
+  `,
+  expectedTables: ['users', 'products', 'brands', 'orders', 'cart_items']
+};
+
+// Task 1.3: Configure Supabase Storage
+const testSupabaseStorage = {
+  validation: [
+    'Products bucket created',
+    'Brands bucket created', 
+    'Upload 2MB file succeeds',
+    'Signed URL generation works'
+  ],
+  testScript: `
+    // Test file upload
+    const { data, error } = await supabase.storage
+      .from('products')
+      .upload('test-image.jpg', testFile);
+    expect(error).toBeNull();
+    expect(data.path).toBeDefined();
+  `
+};
+```
+
+---
+
+## **🎨 GOAL 2: Frontend Component Testing Matrix**
+
+```typescript
+// Task 2.1: ProductCard.tsx Testing
+const testProductCard = {
+  unitTests: [
+    'Renders product name, price, image',
+    'Add to cart button triggers callback',
+    'Out of stock state displays correctly',
+    'Brand theming applies properly',
+    'Loading skeleton shows during load'
+  ],
+  visualTests: [
+    'Mobile responsive (375px)',
+    'Tablet responsive (768px)', 
+    'Desktop responsive (1024px)',
+    'Hover states work correctly',
+    'Image aspect ratio maintained'
+  ],
+  accessibilityTests: [
+    'Alt text on product images',
+    'Button has accessible name',
+    'Color contrast meets WCAG AA',
+    'Keyboard navigation works'
+  ],
+  testFile: '__tests__/ProductCard.test.tsx'
+};
+
+// Task 2.2: CartModal.tsx Testing
+const testCartModal = {
+  unitTests: [
+    'Displays cart items correctly',
+    'Quantity controls update cart',
+    'Remove item functionality works',
+    'Total calculation is accurate',
+    'Checkout button navigates correctly'
+  ],
+  integrationTests: [
+    'useCart hook integration',
+    'Supabase cart API calls',
+    'Modal open/close animations',
+    'Empty cart state display'
+  ],
+  e2eTests: [
+    'Add item → Modal shows item',
+    'Update quantity → Total updates',
+    'Remove item → Item disappears',
+    'Checkout → Redirects to Stripe'
+  ],
+  testFile: '__tests__/CartModal.test.tsx'
+};
+
+// Task 2.3: WishlistButton.tsx Testing  
+const testWishlistButton = {
+  unitTests: [
+    'Heart icon toggles filled/outline',
+    'onClick triggers API call',
+    'Loading state disables button',
+    'Error state shows feedback'
+  ],
+  apiTests: [
+    'POST /api/wishlist adds item',
+    'DELETE /api/wishlist removes item',
+    'Auth required validation',
+    'Duplicate prevention'
+  ],
+  testFile: '__tests__/WishlistButton.test.tsx'
+};
+```
+
+---
+
+## **🔧 GOAL 3: Backend API Testing Requirements**
+
+```typescript
+// Task 3.1: /api/products Testing
+const testProductsAPI = {
+  unitTests: [
+    'Returns product list with pagination',
+    'Brand filtering works correctly', 
+    'Search functionality works',
+    'Error handling for invalid params'
+  ],
+  integrationTests: [
+    'Supabase query execution',
+    'Brand lookup by slug',
+    'Inventory filtering (>0)',
+    'Response format validation'
+  ],
+  performanceTests: [
+    'Response time < 500ms',
+    'Handles 100 concurrent requests',
+    'Memory usage stable',
+    'Database connection pooling'
+  ],
+  testFile: '__tests__/api/products.test.ts',
+  testCurl: `curl -X GET "localhost:3000/api/products?brand=liquidheaven&limit=10"`
+};
+
+// Task 3.5: /api/checkout Testing
+const testCheckoutAPI = {
+  unitTests: [
+    'Creates Stripe session successfully',
+    'Validates cart items exist',
+    'Calculates total correctly',
+    'Returns session URL and ID'
+  ],
+  integrationTests: [
+    'Stripe API integration',
+    'Cart validation via Supabase',
+    'User authentication check',
+    'Inventory verification'
+  ],
+  securityTests: [
+    'Prevents price manipulation',
+    'Validates user owns cart',
+    'Sanitizes input data',
+    'Rate limiting protection'
+  ],
+  testFile: '__tests__/api/checkout.test.ts',
+  mockStripeSession: 'cs_test_123456789'
+};
+
+// Task 3.6: /api/webhooks/stripe Testing
+const testStripeWebhook = {
+  unitTests: [
+    'Verifies Stripe signature',
+    'Creates order in database',
+    'Updates inventory counts',
+    'Handles duplicate events'
+  ],
+  integrationTests: [
+    'End-to-end payment flow',
+    'Database transaction integrity',
+    'Email notification trigger',
+    'Error recovery handling'
+  ],
+  securityTests: [
+    'Rejects invalid signatures',
+    'Prevents replay attacks',
+    'Validates event authenticity',
+    'Logs security violations'
+  ],
+  testFile: '__tests__/api/webhook.test.ts',
+  testScript: 'stripe trigger checkout.session.completed'
+};
+```
+
+---
+
+## **🧪 GOAL 4: Testing & QA Specific Requirements**
+
+```typescript
+// Task 4.1: Unit Test - ProductCard
+const productCardTestSuite = {
+  testCases: [
+    {
+      name: 'renders_product_info',
+      input: { product: mockProduct },
+      expected: 'displays name, price, image, brand'
+    },
+    {
+      name: 'handles_out_of_stock',
+      input: { product: { ...mockProduct, inventory_count: 0 }},
+      expected: 'button disabled, overlay shown'
+    },
+    {
+      name: 'brand_theming_applied',
+      input: { product: liquidHeavenProduct },
+      expected: 'green primary color applied'
+    }
+  ],
+  coverage: '100% lines, 95% branches',
+  testDuration: '< 100ms per test'
+};
+
+// Task 4.2: API Test - /api/checkout
+const checkoutAPITestSuite = {
+  testCases: [
+    {
+      name: 'valid_cart_creates_session',
+      input: { cartItems: validCart, userId: testUserId },
+      expected: { sessionId: 'cs_test_*', url: 'https://checkout.stripe.com/*' }
+    },
+    {
+      name: 'empty_cart_returns_error',
+      input: { cartItems: [], userId: testUserId },
+      expected: { error: 'Cart is empty' }
+    },
+    {
+      name: 'invalid_user_returns_401',
+      input: { cartItems: validCart, userId: null },
+      expected: { status: 401, error: 'Authentication required' }
+    }
+  ],
+  mockStripeResponses: true,
+  testTimeout: '5000ms'
+};
+
+// Task 4.3: E2E Test - Checkout Flow
+const e2eCheckoutTestSuite = {
+  testFlow: [
+    'User browses products page',
+    'User adds item to cart',
+    'User opens cart modal', 
+    'User clicks checkout button',
+    'User redirected to Stripe',
+    'User completes payment',
+    'User sees success page',
+    'Order created in database',
+    'Inventory updated',
+    'Email sent to user'
+  ],
+  testData: {
+    testCard: '4242424242424242',
+    testUser: 'test@gsiorders.com',
+    testProduct: 'liquidheaven-product-1'
+  },
+  testDuration: '< 60 seconds',
+  browserSupport: ['Chrome', 'Firefox', 'Safari', 'Mobile Chrome']
+};
+
+// Task 4.4: RLS Policy Test - Orders
+const rlsPolicyTestSuite = {
+  testCases: [
+    {
+      name: 'user_reads_own_orders_only',
+      setup: 'Create orders for user A and user B',
+      test: 'User A queries orders',
+      expected: 'Returns only user A orders'
+    },
+    {
+      name: 'admin_reads_all_orders',
+      setup: 'Login as admin user',
+      test: 'Query all orders',
+      expected: 'Returns orders from all users'
+    },
+    {
+      name: 'unauthenticated_access_denied',
+      setup: 'No authentication',
+      test: 'Query orders table',
+      expected: 'Returns empty result set'
+    }
+  ],
+  testQueries: [
+    'SELECT * FROM orders WHERE user_id = auth.uid()',
+    'SELECT COUNT(*) FROM orders', // Should work for admin only
+  ]
+};
+```
+
+---
+
+## **📋 TASK COMPLETION TESTING CHECKLIST**
+
+```typescript
+// MANDATORY: Before marking ANY task complete, run this checklist:
+
+const taskCompletionTestingRules = {
+  // 1. Unit Testing (Required for ALL tasks)
+  unitTestsRequired: [
+    '✅ Component renders without errors',
+    '✅ All props handled correctly', 
+    '✅ Event handlers trigger correctly',
+    '✅ Error states display properly',
+    '✅ Loading states work correctly'
+  ],
+
+  // 2. Integration Testing (Required for API tasks)
+  integrationTestsRequired: [
+    '✅ Database operations work',
+    '✅ External API calls succeed',
+    '✅ Authentication flows work',
+    '✅ Error handling robust'
+  ],
+
+  // 3. Visual Testing (Required for UI tasks)
+  visualTestsRequired: [
+    '✅ Mobile responsive (375px)',
+    '✅ Tablet responsive (768px)',
+    '✅ Desktop responsive (1024px+)',
+    '✅ Brand theming applied',
+    '✅ Hover/focus states work'
+  ],
+
+  // 4. Accessibility Testing (Required for ALL UI tasks)
+  accessibilityTestsRequired: [
+    '✅ Screen reader compatible',
+    '✅ Keyboard navigation works',
+    '✅ Color contrast WCAG AA',
+    '✅ ARIA labels present',
+    '✅ Focus indicators visible'
+  ],
+
+  // 5. Performance Testing (Required for critical path)
+  performanceTestsRequired: [
+    '✅ Page load < 2 seconds',
+    '✅ API response < 500ms',
+    '✅ No memory leaks',
+    '✅ Smooth animations 60fps'
+  ]
+};
+```
+
+---
+
+## **🎯 NANO TASK TESTING PATTERN**
+
+```typescript
+// For EVERY nano task (< 30 min), include this minimal test:
+
+const nanoTaskTestPattern = {
+  // Example: Add console.log statement
+  task: 'Add error logging to cart API',
+  nanoTest: `
+    // Test: Verify error is logged
+    const consoleSpy = jest.spyOn(console, 'error');
+    await triggerError();
+    expect(consoleSpy).toHaveBeenCalledWith('Cart error:', expect.any(Error));
+  `,
+  
+  // Example: Update CSS class
+  task: 'Change button color to brand primary',
+  nanoTest: `
+    // Test: Verify CSS class applied
+    render(<Button />);
+    expect(screen.getByRole('button')).toHaveClass('bg-brand-primary');
+  `,
+  
+  timeLimit: '5 minutes for nano test'
+};
+```
+
+---
+
+**✅ NOW TESTING RULES INCLUDE:**
+- [x] **Task-specific test requirements** for each implementation plan task
+- [x] **Unit test specifications** per component/API
+- [x] **Integration test requirements** per feature
+- [x] **E2E test flows** for user journeys  
+- [x] **Performance benchmarks** per task type
+- [x] **Accessibility validation** per UI task
+- [x] **Security testing** for API endpoints
+- [x] **Task completion checklists** before marking done
+- [x] **Nano task testing patterns** for micro changes
+
+

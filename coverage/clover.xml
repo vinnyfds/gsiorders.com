@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1751870805593" clover="3.2.0">
+  <project timestamp="1751870805593" name="All files">
+    <metrics statements="131" coveredstatements="8" conditionals="109" coveredconditionals="4" methods="9" coveredmethods="1" elements="249" coveredelements="13" complexity="0" loc="131" ncloc="131" packages="1" files="3" classes="3"/>
+    <file name="health.ts" path="D:\GSIORDERS\gsiorders.com\pages\api\health.ts">
+      <metrics statements="8" coveredstatements="8" conditionals="6" coveredconditionals="4" methods="1" coveredmethods="1"/>
+      <line num="3" count="1" type="stmt"/>
+      <line num="7" count="4" type="cond" truecount="2" falsecount="0"/>
+      <line num="8" count="1" type="stmt"/>
+      <line num="11" count="3" type="stmt"/>
+      <line num="13" count="3" type="stmt"/>
+      <line num="21" count="2" type="stmt"/>
+      <line num="23" count="1" type="stmt"/>
+      <line num="24" count="1" type="stmt"/>
+    </file>
+    <file name="reviews.ts" path="D:\GSIORDERS\gsiorders.com\pages\api\reviews.ts">
+      <metrics statements="61" coveredstatements="0" conditionals="55" coveredconditionals="0" methods="4" coveredmethods="0"/>
+      <line num="2" count="0" type="stmt"/>
+      <line num="4" count="0" type="stmt"/>
+      <line num="16" count="0" type="stmt"/>
+      <line num="20" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="21" count="0" type="stmt"/>
+      <line num="22" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="23" count="0" type="stmt"/>
+      <line num="25" count="0" type="stmt"/>
+      <line num="30" count="0" type="stmt"/>
+      <line num="31" count="0" type="stmt"/>
+      <line num="34" count="0" type="cond" truecount="0" falsecount="5"/>
+      <line num="35" count="0" type="stmt"/>
+      <line num="41" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="42" count="0" type="stmt"/>
+      <line num="48" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="49" count="0" type="stmt"/>
+      <line num="54" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="55" count="0" type="stmt"/>
+      <line num="61" count="0" type="stmt"/>
+      <line num="63" count="0" type="stmt"/>
+      <line num="71" count="0" type="stmt"/>
+      <line num="77" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="78" count="0" type="stmt"/>
+      <line num="82" count="0" type="stmt"/>
+      <line num="89" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="90" count="0" type="stmt"/>
+      <line num="96" count="0" type="stmt"/>
+      <line num="108" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="109" count="0" type="stmt"/>
+      <line num="110" count="0" type="stmt"/>
+      <line num="113" count="0" type="stmt"/>
+      <line num="115" count="0" type="stmt"/>
+      <line num="128" count="0" type="stmt"/>
+      <line num="129" count="0" type="stmt"/>
+      <line num="134" count="0" type="stmt"/>
+      <line num="135" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="137" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="138" count="0" type="stmt"/>
+      <line num="141" count="0" type="stmt"/>
+      <line num="142" count="0" type="stmt"/>
+      <line num="145" count="0" type="cond" truecount="0" falsecount="8"/>
+      <line num="148" count="0" type="stmt"/>
+      <line num="151" count="0" type="stmt"/>
+      <line num="153" count="0" type="stmt"/>
+      <line num="156" count="0" type="stmt"/>
+      <line num="172" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="173" count="0" type="stmt"/>
+      <line num="174" count="0" type="stmt"/>
+      <line num="178" count="0" type="stmt"/>
+      <line num="184" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="185" count="0" type="stmt"/>
+      <line num="186" count="0" type="stmt"/>
+      <line num="190" count="0" type="stmt"/>
+      <line num="196" count="0" type="stmt"/>
+      <line num="197" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="198" count="0" type="stmt"/>
+      <line num="199" count="0" type="stmt"/>
+      <line num="202" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="204" count="0" type="stmt"/>
+      <line num="217" count="0" type="stmt"/>
+      <line num="218" count="0" type="stmt"/>
+    </file>
+    <file name="wishlist.ts" path="D:\GSIORDERS\gsiorders.com\pages\api\wishlist.ts">
+      <metrics statements="62" coveredstatements="0" conditionals="48" coveredconditionals="0" methods="4" coveredmethods="0"/>
+      <line num="2" count="0" type="stmt"/>
+      <line num="4" count="0" type="stmt"/>
+      <line num="16" count="0" type="stmt"/>
+      <line num="20" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="21" count="0" type="stmt"/>
+      <line num="22" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="23" count="0" type="stmt"/>
+      <line num="25" count="0" type="stmt"/>
+      <line num="30" count="0" type="stmt"/>
+      <line num="31" count="0" type="stmt"/>
+      <line num="34" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="35" count="0" type="stmt"/>
+      <line num="41" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="42" count="0" type="stmt"/>
+      <line num="48" count="0" type="stmt"/>
+      <line num="50" count="0" type="stmt"/>
+      <line num="57" count="0" type="stmt"/>
+      <line num="63" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="64" count="0" type="stmt"/>
+      <line num="68" count="0" type="stmt"/>
+      <line num="75" count="0" type="stmt"/>
+      <line num="77" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="78" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="79" count="0" type="stmt"/>
+      <line num="86" count="0" type="stmt"/>
+      <line num="93" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="94" count="0" type="stmt"/>
+      <line num="95" count="0" type="stmt"/>
+      <line num="98" count="0" type="stmt"/>
+      <line num="100" count="0" type="stmt"/>
+      <line num="107" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="108" count="0" type="stmt"/>
+      <line num="115" count="0" type="stmt"/>
+      <line num="121" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="122" count="0" type="stmt"/>
+      <line num="123" count="0" type="stmt"/>
+      <line num="126" count="0" type="stmt"/>
+      <line num="128" count="0" type="stmt"/>
+      <line num="136" count="0" type="stmt"/>
+      <line num="137" count="0" type="stmt"/>
+      <line num="142" count="0" type="stmt"/>
+      <line num="143" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="146" count="0" type="stmt"/>
+      <line num="148" count="0" type="stmt"/>
+      <line num="149" count="0" type="stmt"/>
+      <line num="152" count="0" type="cond" truecount="0" falsecount="8"/>
+      <line num="155" count="0" type="stmt"/>
+      <line num="158" count="0" type="stmt"/>
+      <line num="160" count="0" type="stmt"/>
+      <line num="163" count="0" type="stmt"/>
+      <line num="182" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="183" count="0" type="stmt"/>
+      <line num="184" count="0" type="stmt"/>
+      <line num="188" count="0" type="stmt"/>
+      <line num="193" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="194" count="0" type="stmt"/>
+      <line num="195" count="0" type="stmt"/>
+      <line num="199" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="204" count="0" type="stmt"/>
+      <line num="206" count="0" type="stmt"/>
+      <line num="218" count="0" type="stmt"/>
+      <line num="219" count="0" type="stmt"/>
+    </file>
+  </project>
+</coverage>
