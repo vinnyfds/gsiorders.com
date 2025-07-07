@@ -15,6 +15,7 @@
 - **2025-01-06_cart-checkout-coverage.md** - Cart API coverage below 80% threshold, enhanced test suite to achieve 89.77% statements and 87.93% branches
 - [2025-01-06_e2e-setup.md](problems/2025-01-06_e2e-setup.md) — Playwright E2E setup, selector, and redirect issues
 - 2025-07-07_health-ci-smoke.md — Health endpoint, smoke test, CI gate
+- **2025-01-07_tax-calculation-api.md** - Tax calculation API implementation with comprehensive testing and validation
 
 ## Commands
 
@@ -24,6 +25,7 @@
 - [2025-01-06_e2e-setup.sh](commands/2025-01-06_e2e-setup.sh) — All Playwright E2E setup and test commands
 - **2025-01-06_env_template_ci_integration.sh** - Commands for environment template and CI integration documentation
 - commands/2025-07-07_health-ci-smoke.sh — All CLI for health endpoint, smoke, CI
+- **2025-01-07_tax-calculation-api.sh** - Commands for tax calculation API implementation and testing
 
 ## Resources
 
@@ -33,7 +35,7 @@
 - **.env.example** - Environment variable template with Supabase, Stripe, AWS, and development configuration
 
 ---
-**Last Updated**: 2025-01-06
-**Total Entries**: 7
-**Project Status**: 90% complete, E2E testing infrastructure ready
-**Next Review**: After implementing additional E2E scenarios (logged-in checkout, wishlist flows)
+**Last Updated**: 2025-01-07
+**Total Entries**: 8
+**Project Status**: 92% complete, tax calculation API implemented
+**Next Review**: After implementing AI chatbot endpoint
