@@ -1,0 +1,226 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## 🛡️ **Experienced Ecommerce Developer Rules for Cursor AI**
+
+
+### **7. Ecommerce Defense-First Development Rules**
+
+```
+APPROACH: Think like a senior ecommerce developer with 10+ years experience.
+MINDSET: Assume everything can and will break. Code defensively.
+
+=== DATA VALIDATION & SANITIZATION ===
+
+ALWAYS validate inputs at multiple layers:
+1. Client-side: Immediate user feedback
+2. API layer: Security and business logic
+3. Database layer: Final data integrity
+
+Example pattern for EVERY user input:
+```typescript
+// Client validation
+const validateQuantity = (qty: number) => {
+  if (!qty || qty < 1 || qty > 99) throw new Error('Invalid quantity');
+  return Math.floor(qty); // Prevent decimal quantities
+};
+
+// API validation
+if (!productId || !isUUID(productId)) {
+  return res.status(400).json({ error: 'Invalid product ID' });
+}
+
+// Database constraints
+CHECK (quantity > 0 AND quantity <= 99)
+```
+
+=== INVENTORY & STOCK MANAGEMENT ===
+
+NEVER trust client-side inventory counts:
+- Always check stock availability server-side before ANY cart operation
+- Use database transactions for inventory updates
+- Implement optimistic locking for high-traffic scenarios
+- Add buffer quantities for safety (reserve 1-2 items)
+
+Pattern:
+```typescript
+// ❌ WRONG: Trust client data
+await updateCart(productId, clientQuantity);
+
+// ✅ RIGHT: Verify server-side
+const product = await getProduct(productId);
+if (product.inventory_count < requestedQuantity) {
+  throw new Error(`Only ${product.inventory_count} items available`);
+}
+```
+
+=== PAYMENT & CART SECURITY ===
+
+CRITICAL ecommerce security rules:
+1. Never calculate prices on client-side
+2. Always recalculate totals server-side before payment
+3. Validate cart contents haven't changed during checkout
+4. Use Stripe's secure payment methods only
+5. Implement idempotency for payment operations
+
+Pattern:
+```typescript
+// Server-side price calculation ONLY
+const serverTotal = cartItems.reduce((sum, item) => {
+  const dbProduct = await getProduct(item.product_id);
+  return sum + (dbProduct.price * item.quantity);
+}, 0);
+
+if (Math.abs(clientTotal - serverTotal) > 0.01) {
+  throw new Error('Price mismatch detected');
+}
+```
+
+=== ERROR HANDLING & USER EXPERIENCE ===
+
+Implement graceful degradation:
+- Always provide fallback UI states
+- Show specific error messages, not generic ones
+- Implement retry mechanisms for failed operations
+- Log all errors for debugging
+
+Pattern:
+```typescript
+try {
+  await addToCart(productId, quantity);
+  showToast('Added to cart successfully', 'success');
+} catch (error) {
+  if (error.code === 'INSUFFICIENT_STOCK') {
+    showToast(`Only ${error.available} items available`, 'warning');
+  } else if (error.code === 'PRODUCT_NOT_FOUND') {
+    showToast('Product no longer available', 'error');
+    removeFromUI(productId);
+  } else {
+    showToast('Failed to add to cart. Please try again.', 'error');
+    logError('Cart addition failed', { productId, error });
+  }
+}
+```
+
+=== AUTHENTICATION & AUTHORIZATION ===
+
+Secure every endpoint:
+- Verify user authentication on ALL protected routes
+- Check user permissions (user/admin/rep roles)
+- Implement proper session management
+- Never trust client-side role claims
+
+Pattern:
+```typescript
+// EVERY protected API route must start with:
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) return res.status(401).json({ error: 'Authentication required' });
+
+// For admin endpoints:
+const { data: userRecord } = await supabase
+  .from('users')
+  .select('role')
+  .eq('id', user.id)
+  .single();
+
+if (userRecord.role !== 'admin') {
+  return res.status(403).json({ error: 'Admin access required' });
+}
+```
+
+=== RACE CONDITION PREVENTION ===
+
+Prevent concurrent operation issues:
+- Use loading states to disable multiple clicks
+- Implement debouncing for search/filter operations
+- Use database transactions for related operations
+- Add optimistic UI updates with rollback capability
+
+Pattern:
+```typescript
+const [isAdding, setIsAdding] = useState(false);
+
+const handleAddToCart = async () => {
+  if (isAdding) return; // Prevent double-clicks
+  setIsAdding(true);
+  
+  try {
+    await addToCart(productId, quantity);
+  } finally {
+    setIsAdding(false);
+  }
+};
+```
+
+=== TESTING-READY CODE STRUCTURE ===
+
+Write code that's easy to test:
+- Separate business logic from UI components
+- Use dependency injection for external services
+- Create pure functions where possible
+- Mock external API calls consistently
+
+Pattern:
+```typescript
+// ✅ Testable structure
+export const calculateCartTotal = (items: CartItem[]) => {
+  return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+};
+
+export const CartComponent = ({ onCalculateTotal = calculateCartTotal }) => {
+  const total = onCalculateTotal(cartItems);
+  // ...
+};
+```
+
+=== PERFORMANCE OPTIMIZATION ===
+
+Ecommerce performance rules:
+- Implement pagination for product lists (max 20 items per page)
+- Use skeleton loading states
+- Optimize images (WebP format, multiple sizes)
+- Cache frequently accessed data
+- Use React.memo for expensive components
+
+=== MONITORING & DEBUGGING ===
+
+Always include debugging information:
+- Log all critical operations (cart changes, payments, orders)
+- Include user context in error logs
+- Track performance metrics
+- Monitor conversion funnel drop-offs
+
+Pattern:
+```typescript
+console.log('🛒 Cart operation:', {
+  action: 'add_to_cart',
+  user_id: user.id,
+  product_id: productId,
+  quantity,
+  timestamp: new Date().toISOString()
+});
+```
+```
+
+### **8. Pre-Implementation Checklist Rule**
+
+```
+BEFORE writing any ecommerce-related code, ask these questions:
+
+1. "What happens if the user loses internet connection?"
+2. "What if two users buy the last item simultaneously?"
+3. "How do I handle payment failures?"
+4. "What if the user refreshes during checkout?"
+5. "How do I prevent cart manipulation attacks?"
+6. "What's the fallback if external APIs are down?"
+7. "How do I test this without real money?"
+8. "What data needs to be logged for debugging?"
+
+If you can't answer these, redesign the approach.
+```
+
+**These rules will dramatically reduce testing failures by catching issues during development rather than testing.**
+
+

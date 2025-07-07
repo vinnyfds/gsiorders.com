@@ -1,0 +1,430 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🚨 **CRITICAL MISSING: CODE DUPLICATION PREVENTION RULES**
+
+
+---
+
+## **🔍 PRE-DEVELOPMENT ANALYSIS RULES**
+
+### **MANDATORY: File System Scan Before ANY Task**
+
+```typescript
+/**
+ * CURSOR AI RULE: Before starting ANY task, run this analysis:
+ */
+
+const preTaskAnalysis = {
+  // 1. SCAN EXISTING FILES
+  scanDirectories: [
+    'pages/',           // Check existing pages
+    'pages/api/',       // Check existing API endpoints  
+    'src/components/',  // Check existing components
+    'src/hooks/',       // Check existing hooks
+    'src/utils/',       // Check existing utilities
+    'supabase/',        // Check database setup
+  ],
+
+  // 2. READ EXISTING CODE
+  readExistingFiles: [
+    'package.json',     // Dependencies & scripts
+    'tailwind.config.js', // Styling setup
+    '.env.local',       // Environment variables
+    'tsconfig.json',    // TypeScript config
+    'README.md'         // Project documentation
+  ],
+
+  // 3. ANALYZE FUNCTIONALITY
+  checkForExisting: [
+    'Similar component names',
+    'Duplicate API endpoints',
+    'Overlapping hook functionality', 
+    'Repeated utility functions',
+    'Database table operations',
+    'Styling patterns already defined'
+  ]
+};
+```
+
+### **File Naming Conflict Prevention**
+
+```typescript
+// BEFORE creating ANY file, check these patterns:
+
+const fileConflictRules = {
+  // Component naming conflicts
+  componentPatterns: [
+    'ProductCard.tsx vs Product.tsx vs ProductItem.tsx',
+    'CartModal.tsx vs Cart.tsx vs CartDialog.tsx', 
+    'UserProfile.tsx vs Profile.tsx vs User.tsx',
+    'AdminDashboard.tsx vs Dashboard.tsx vs Admin.tsx'
+  ],
+
+  // API endpoint conflicts  
+  apiPatterns: [
+    '/api/products vs /api/product vs /api/items',
+    '/api/cart vs /api/shopping-cart vs /api/basket',
+    '/api/user vs /api/users vs /api/profile',
+    '/api/checkout vs /api/payment vs /api/purchase'
+  ],
+
+  // Hook naming conflicts
+  hookPatterns: [
+    'useCart vs useShoppingCart vs useBasket',
+    'useAuth vs useAuthentication vs useUser',
+    'useProducts vs useProductList vs useItems'
+  ],
+
+  // RULE: If similar exists, EXTEND it instead of creating new
+  resolution: 'EXTEND_EXISTING_OR_REFACTOR_WITH_CLEAR_DISTINCTION'
+};
+```
+
+---
+
+## **📖 EXISTING CODE ANALYSIS RULES**
+
+### **Read & Understand Existing Implementation**
+
+```typescript
+/**
+ * CURSOR AI MUST analyze existing code patterns before adding new features
+ */
+
+const codeAnalysisRules = {
+  // 1. COMPONENT ANALYSIS
+  analyzeComponents: {
+    checkFor: [
+      'Existing prop interfaces',
+      'Styling patterns used',
+      'Error handling approaches',
+      'Loading state implementations',
+      'Event handler patterns'
+    ],
+    example: `
+      // Before creating new ProductCard, analyze existing:
+      // - What props does current ProductCard accept?
+      // - How does it handle loading states?
+      // - What styling pattern does it use?
+      // - Does it already handle brand theming?
+    `
+  },
+
+  // 2. API ANALYSIS  
+  analyzeAPIs: {
+    checkFor: [
+      'Existing endpoint patterns',
+      'Authentication methods used',
+      'Error response formats',
+      'Database query patterns',
+      'Validation approaches'
+    ],
+    example: `
+      // Before creating /api/orders, check:
+      // - Does /api/user/orders already exist?
+      // - What's the auth pattern in other APIs?
+      // - How do other APIs handle errors?
+      // - What's the response format standard?
+    `
+  },
+
+  // 3. DATABASE ANALYSIS
+  analyzeDatabase: {
+    checkFor: [
+      'Existing table relationships',
+      'Current query patterns',
+      'RLS policies in place',
+      'Index strategies used',
+      'Data validation rules'
+    ],
+    example: `
+      // Before adding new table operations:
+      // - What tables already exist?
+      // - How are relationships handled?
+      // - What's the RLS pattern?
+      // - Are there existing utility functions?
+    `
+  }
+};
+```
+
+### **Functionality Overlap Detection**
+
+```typescript
+const functionalityOverlapRules = {
+  // BEFORE implementing new feature, check if it exists:
+  
+  cartFunctionality: {
+    existing: [
+      'useCart.ts - cart state management',
+      'pages/api/cart.ts - cart CRUD operations',
+      'cart.tsx - cart display page',
+      'CartModal component (if exists)'
+    ],
+    checkBefore: 'Adding any cart-related feature',
+    rule: 'EXTEND existing cart system, do not create parallel system'
+  },
+
+  authFunctionality: {
+    existing: [
+      'Supabase auth setup',
+      'User session management',
+      'Admin role checking',
+      'Authentication middleware'
+    ],
+    checkBefore: 'Adding any auth-related feature',
+    rule: 'USE existing auth patterns consistently'
+  },
+
+  paymentFunctionality: {
+    existing: [
+      'Stripe integration setup',
+      'Checkout session creation',
+      'Webhook handling',
+      'Payment success/cancel pages'
+    ],
+    checkBefore: 'Adding any payment feature',
+    rule: 'INTEGRATE with existing Stripe setup'
+  },
+
+  productFunctionality: {
+    existing: [
+      'Product data structure',
+      'Brand filtering logic',
+      'Search implementation',
+      'Product display components'
+    ],
+    checkBefore: 'Adding any product feature',
+    rule: 'FOLLOW existing product patterns'
+  }
+};
+```
+
+---
+
+## **🛡️ DUPLICATION PREVENTION CHECKLIST**
+
+### **Pre-Creation Validation (MANDATORY)**
+
+```typescript
+/**
+ * CURSOR AI MUST complete this checklist before creating ANYTHING:
+ */
+
+const duplicationPreventionChecklist = {
+  // 1. FILE EXISTENCE CHECK
+  fileCheck: [
+    '❓ Does a file with similar name already exist?',
+    '❓ Does a file with similar functionality already exist?', 
+    '❓ Can I extend existing file instead of creating new?',
+    '❓ Is there a utility that already does this?'
+  ],
+
+  // 2. FUNCTIONALITY CHECK  
+  functionalityCheck: [
+    '❓ Does this feature already exist elsewhere?',
+    '❓ Is there an existing hook that handles this?',
+    '❓ Is there an API endpoint that already does this?',
+    '❓ Can I refactor existing code to be more reusable?'
+  ],
+
+  // 3. PATTERN CHECK
+  patternCheck: [
+    '❓ What styling pattern is used in similar components?',
+    '❓ What error handling pattern is used in similar APIs?',
+    '❓ What validation pattern is used elsewhere?',
+    '❓ What naming convention is used for similar features?'
+  ],
+
+  // 4. INTEGRATION CHECK
+  integrationCheck: [
+    '❓ How does this integrate with existing features?',
+    '❓ Will this conflict with existing functionality?',
+    '❓ Does this follow the same data flow patterns?',
+    '❓ Is this consistent with existing architecture?'
+  ]
+};
+```
+
+### **Code Review Before Implementation**
+
+```typescript
+const preImplementationReview = {
+  // ANALYZE these files before starting ANY task:
+  
+  mustRead: [
+    // Current implementation status
+    'src/components/ProductCard.tsx',  // How products are displayed
+    'src/hooks/useCart.ts',           // How cart state is managed
+    'pages/api/cart.ts',              // How cart operations work
+    'pages/api/products.ts',          // How products API works
+    'pages/api/checkout.ts',          // How checkout works
+    'pages/api/webhook.ts',           // How webhooks work
+    
+    // Configuration files
+    'tailwind.config.js',             // Styling setup
+    'next.config.js',                 // Next.js config
+    'tsconfig.json',                  // TypeScript setup
+    'package.json',                   // Dependencies
+  ],
+
+  extractPatterns: [
+    'How are TypeScript interfaces defined?',
+    'What error handling pattern is used?', 
+    'How are loading states implemented?',
+    'What CSS class naming is used?',
+    'How are API responses structured?',
+    'What validation approach is used?'
+  ],
+
+  documentFindings: `
+    // ALWAYS document what you found:
+    /**
+     * EXISTING CODE ANALYSIS:
+     * ✅ ProductCard.tsx - Uses brand theming, handles loading states
+     * ✅ useCart.ts - Manages cart state with localStorage persistence  
+     * ✅ /api/cart - Full CRUD with Supabase integration
+     * ❌ CartModal - NOT FOUND, safe to create
+     * ❌ Wishlist functionality - NOT FOUND, safe to create
+     * 
+     * PATTERNS IDENTIFIED:
+     * - Error handling: try/catch with user-friendly messages
+     * - Loading: disabled buttons with spinner
+     * - Styling: Tailwind with CSS custom properties
+     * - API: Standard Next.js API routes with TypeScript
+     */
+  `
+};
+```
+
+---
+
+## **🔄 EXISTING CODE INTEGRATION RULES**
+
+### **Extend vs Create New Decision Matrix**
+
+```typescript
+const extendVsCreateRules = {
+  // EXTEND existing if:
+  shouldExtend: [
+    'Similar functionality exists (>70% overlap)',
+    'Same data model is used',
+    'Same user flow applies',
+    'Same styling pattern needed',
+    'Same error handling required'
+  ],
+
+  // CREATE NEW if:
+  shouldCreateNew: [
+    'Completely different functionality (<30% overlap)',
+    'Different data structure needed',
+    'Different user experience required',
+    'Different performance requirements',
+    'Clear separation of concerns needed'
+  ],
+
+  // REFACTOR existing if:
+  shouldRefactor: [
+    'Current code doesn\'t follow patterns',
+    'Current code has technical debt',
+    'Current code lacks TypeScript types',
+    'Current code missing error handling',
+    'Current code not responsive'
+  ],
+
+  decisionExample: `
+    // EXAMPLE: CartModal task
+    // ✅ ANALYSIS: useCart.ts exists, cart.tsx page exists
+    // ✅ DECISION: CREATE CartModal (different UI pattern)
+    // ✅ INTEGRATION: Use existing useCart hook
+    // ❌ DON'T: Create new cart state management
+  `
+};
+```
+
+### **Incremental Development Rules**
+
+```typescript
+const incrementalDevelopmentRules = {
+  // Build on existing foundation:
+  approach: [
+    '1. Read and understand existing code',
+    '2. Identify reusable patterns and utilities',
+    '3. Extend existing functionality where possible',
+    '4. Create new only when necessary',
+    '5. Ensure consistency with existing patterns',
+    '6. Update related code if needed'
+  ],
+
+  example: `
+    // TASK: Add product search functionality
+    // ❌ WRONG: Create new SearchProducts component from scratch
+    // ✅ RIGHT: 
+    //   1. Check products.tsx - how are products displayed?
+    //   2. Check /api/products - does it support search already?
+    //   3. Extend existing ProductCard for search results
+    //   4. Add search input to existing products page
+    //   5. Use existing brand filtering patterns
+  `
+};
+```
+
+---
+
+## **📋 PROJECT-SPECIFIC ANALYSIS TEMPLATE**
+
+```typescript
+/**
+ * CURSOR AI: Use this template before EVERY task
+ */
+
+const projectAnalysisTemplate = `
+TASK: [Task name from implementation plan]
+
+EXISTING CODE ANALYSIS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📁 RELATED FILES FOUND:
+- [ ] Component: [list existing components that relate]
+- [ ] API: [list existing API endpoints that relate]  
+- [ ] Hook: [list existing hooks that relate]
+- [ ] Utility: [list existing utilities that relate]
+- [ ] Types: [list existing TypeScript interfaces]
+
+🔍 FUNCTIONALITY ANALYSIS:
+- [ ] Does this feature already exist? [Y/N + details]
+- [ ] Can I extend existing code? [Y/N + which files]
+- [ ] What patterns should I follow? [list patterns found]
+- [ ] What naming convention is used? [describe convention]
+
+🎯 IMPLEMENTATION DECISION:
+- [ ] CREATE NEW: [justify why new file needed]
+- [ ] EXTEND EXISTING: [which file to extend + how]
+- [ ] REFACTOR FIRST: [what needs refactoring + why]
+
+🔗 INTEGRATION PLAN:
+- [ ] Dependencies: [list existing code this will use]
+- [ ] Impact: [list existing code this might affect]
+- [ ] Testing: [how to test without breaking existing]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`;
+```
+
+---
+
+**✅ NOW CURSOR AI RULES INCLUDE:**
+- [x] **Mandatory file system scanning** before any task
+- [x] **Existing code analysis requirements** 
+- [x] **Duplication prevention checklist**
+- [x] **Functionality overlap detection**
+- [x] **Extend vs create decision matrix**
+- [x] **Incremental development approach**
+- [x] **Project-specific analysis template**
+- [x] **Integration planning requirements**
+
+**🎯 Cursor AI will now ALWAYS check existing code before creating anything new, preventing duplication and ensuring consistency!**
+
+

@@ -1,0 +1,64 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## 🔄 **GitHub Commit Rule for Cursor AI**
+
+
+### **6. GitHub Version Control Rule**
+```
+MANDATORY: After completing each macro task, execute the following Git workflow:
+
+1. Stage all changes:
+   git add .
+
+2. Create descriptive commit message following this format:
+   git commit -m "feat: [TASK_NAME] - [BRIEF_DESCRIPTION]"
+   
+   Examples:
+   - "feat: ProductCard component - Added responsive design and hover states"
+   - "feat: Cart API endpoint - Implemented add/remove/update functionality"
+   - "fix: Stripe webhook - Fixed signature verification and order creation"
+   - "feat: Admin dashboard - Added inventory management and metrics"
+
+3. Push to main branch:
+   git push origin main
+
+4. Confirm completion by stating:
+   "✅ Task completed and pushed to GitHub: [COMMIT_MESSAGE]"
+
+COMMIT MESSAGE PREFIXES:
+- feat: New feature or major functionality
+- fix: Bug fixes or corrections
+- update: Updates to existing features
+- refactor: Code restructuring without functionality changes
+- docs: Documentation updates
+- style: UI/styling changes
+- test: Adding or updating tests
+- config: Configuration file changes
+
+BEFORE COMMITTING:
+- Verify all files are saved
+- Check that no sensitive data (.env values) are being committed
+- Ensure the application builds without errors (npm run build)
+- Test the implemented functionality works as expected
+
+If git push fails due to conflicts:
+1. Pull latest changes: git pull origin main
+2. Resolve any conflicts
+3. Commit again with updated message
+4. Push successfully
+```
+
+### **Example Implementation Flow:**
+```bash
+# After completing ProductCard component task:
+git add .
+git commit -m "feat: ProductCard component - Added responsive design, hover states, and cart integration"
+git push origin main
+```
+
+**This rule ensures every macro task completion is properly tracked in version control with meaningful commit history.**
+
+
