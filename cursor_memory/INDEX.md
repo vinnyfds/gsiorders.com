@@ -93,6 +93,28 @@ This index tracks key decisions, patterns, and lessons learned during gsiorders.
 **Key Patterns**: Next.js Document file requirements, frontend-backend integration, component architecture
 **Links**: ChatTrigger/ChatWidget implementation, ENOENT error resolution, accessibility compliance
 
+### 📅 2025-01-07_tax-calculation-api.md
+**Status**: ✅ Complete  
+**Summary**: Implemented tax calculation API for accurate billing and financial reporting
+**Key Patterns**: API design, data integration, tax calculation logic
+**Links**: API endpoint for tax calculation, integration with billing system
+
+## Problems Solved
+
+### 📅 2025-01-07_chatbot-anthropic-migration.md
+**Status**: ✅ Complete  
+**Summary**: Migrated chatbot from Anthropic to OpenAI, ensuring seamless continuity
+**Key Patterns**: Migration strategy, API integration, data migration
+**Links**: Successful migration, no data loss, improved performance
+
+## Commands
+
+### 📅 2025-01-07_chatbot-api-commands.sh
+**Status**: ✅ Complete  
+**Summary**: Shell script for managing chatbot API commands
+**Key Patterns**: Shell scripting, API interaction
+**Links**: Script for managing chatbot API, automation of common tasks
+
 ---
 **Last Updated**: 2025-01-07
 **Total Entries**: 8

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import fetch from 'node-fetch';
+import { askClaude, getClaudeModel, type ClaudeResponse } from '../../src/utils/claude';
 
 // Types for better TypeScript support
 interface ChatbotRequest {
@@ -17,31 +17,6 @@ interface ChatbotResponse {
 interface ChatbotError {
   error: string;
   details?: string;
-}
-
-// Anthropic API response types
-interface AnthropicContent {
-  type: string;
-  text: string;
-}
-
-interface AnthropicMessage {
-  role: string;
-  content: AnthropicContent[];
-}
-
-interface AnthropicResponse {
-  id: string;
-  type: string;
-  role: string;
-  content: AnthropicContent[];
-  model: string;
-  stop_reason: string;
-  stop_sequence: string | null;
-  usage: {
-    input_tokens: number;
-    output_tokens: number;
-  };
 }
 
 // Brand-specific system prompts
@@ -75,6 +50,8 @@ const validateRequest = (body: any): { isValid: boolean; error?: string } => {
   
   return { isValid: true };
 };
+
+
 
 export default async function handler(
   req: NextApiRequest,
@@ -119,30 +96,21 @@ export default async function handler(
     // Check if streaming is requested
     const shouldStream = req.headers.accept?.includes('text/event-stream');
 
-    const anthropicUrl = 'https://api.anthropic.com/v1/messages';
-    const headers: Record<string, string> = {
-      'x-api-key': process.env.ANTHROPIC_API_KEY!,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-    };
-    const body = {
-      model: 'claude-3-sonnet-20240229',
-      max_tokens: 500,
-      temperature: 0.7,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: userQuestion }
-      ],
-      stream: shouldStream,
-    };
+    // Use the Claude helper
+    const response = await askClaude(
+      [{ role: 'user', content: userQuestion }],
+      systemPrompt,
+      shouldStream
+    );
 
     // Log outgoing request (excluding API key)
-    const debugHeaders = { ...headers };
-    if (debugHeaders['x-api-key']) debugHeaders['x-api-key'] = '[REDACTED]';
     console.log('Anthropic API Request:', {
-      url: anthropicUrl,
-      headers: debugHeaders,
-      body,
+      model: getClaudeModel(),
+      max_tokens: 500,
+      temperature: 0.7,
+      system: systemPrompt.substring(0, 100) + '...',
+      messages: [{ role: 'user', content: userQuestion.substring(0, 50) + '...' }],
+      stream: shouldStream,
     });
 
     if (shouldStream) {
@@ -152,12 +120,6 @@ export default async function handler(
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
-
-      const response = await fetch(anthropicUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      });
 
       if (!response.ok || !response.body) {
         const errorText = await response.text();
@@ -197,19 +159,13 @@ export default async function handler(
       console.log(`✅ Chatbot streaming response completed for ${brand}`);
     } else {
       // Non-streaming response
-      const response = await fetch(anthropicUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      });
-
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Anthropic API Error Response:', errorText);
         throw new Error(`Anthropic API error: ${response.statusText}`);
       }
 
-      const data = await response.json() as AnthropicResponse;
+      const data = await response.json() as ClaudeResponse;
       const content = data?.content?.[0]?.text || 'I apologize, but I was unable to generate a response. Please try again.';
 
       console.log(`✅ Chatbot response generated for ${brand}`);
