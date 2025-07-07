@@ -1,209 +1,355 @@
 import { createMocks } from 'node-mocks-http';
 
+// Mock Supabase client
 let mockSupabase: any;
-let handler: any;
 
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: (...args: any[]) => {
-    return (global as any).__mockSupabase;
-  }
+  createClient: (...args: any[]) => mockSupabase,
 }));
 
 describe('/api/quotes/request', () => {
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
     mockSupabase = {
+      auth: {
+        getUser: jest.fn()
+      },
       from: jest.fn(() => ({
+        select: jest.fn(() => ({
+          in: jest.fn(() => ({
+            data: [
+              { id: 'product-1', name: 'Test Product 1', price: 29.99, inventory_count: 100 },
+              { id: 'product-2', name: 'Test Product 2', price: 49.99, inventory_count: 50 }
+            ],
+            error: null
+          }))
+        })),
         insert: jest.fn(() => ({
           select: jest.fn(() => ({
-            single: jest.fn()
+            single: jest.fn(() => ({
+              data: { id: 'test-quote-id' },
+              error: null
+            }))
           }))
         }))
       }))
     };
-    (global as any).__mockSupabase = mockSupabase;
-    handler = require('../../../pages/api/quotes/request').default;
+    jest.clearAllMocks();
+    
+    // Default successful auth
+    mockSupabase.auth.getUser.mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null
+    });
   });
 
-  it('should create a quote request successfully', async () => {
-    const mockQuote = {
-      id: 'test-quote-id',
-      status: 'requested'
-    };
-    mockSupabase.from.mockReturnValue({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockResolvedValue({ data: mockQuote, error: null })
-        })
-      })
-    });
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        items: [
-          { productId: 'product-1', quantity: 10, notes: 'Bulk order' },
-          { productId: 'product-2', quantity: 5 }
-        ],
-        companyName: 'Test Company',
-        contactEmail: 'test@company.com',
-        specialRequirements: 'Rush delivery needed'
-      }
-    });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(201);
-    const data = JSON.parse(res._getData());
-    expect(data.id).toBe('test-quote-id');
-    expect(data.status).toBe('requested');
-    expect(data.message).toContain('Quote request submitted successfully');
-  });
+  describe('POST /api/quotes/request', () => {
+    it('should create a quote request successfully', async () => {
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          items: [
+            { product_id: 'product-1', quantity: 5 },
+            { product_id: 'product-2', quantity: 3 }
+          ],
+          company_name: 'Test Company',
+          contact_name: 'John Doe',
+          contact_email: 'john@test.com'
+        }
+      });
 
-  it('should reject non-POST requests', async () => {
-    const { req, res } = createMocks({
-      method: 'GET'
-    });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(405);
-    const data = JSON.parse(res._getData());
-    expect(data.error).toBe('Method not allowed');
-  });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
 
-  it('should validate required items array', async () => {
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        companyName: 'Test Company'
-      }
+      expect(res._getStatusCode()).toBe(201);
+      const data = JSON.parse(res._getData());
+      expect(data.success).toBe(true);
+      expect(data.quote_id).toBe('test-quote-id');
+      expect(data.message).toBe('Quote request submitted successfully');
     });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(400);
-    const data = JSON.parse(res._getData());
-    expect(data.error).toBe('Invalid request');
-    expect(data.details).toContain('items array is required');
-  });
 
-  it('should validate empty items array', async () => {
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        items: []
-      }
-    });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(400);
-    const data = JSON.parse(res._getData());
-    expect(data.error).toBe('Invalid request');
-    expect(data.details).toContain('items array is required and must not be empty');
-  });
+    it('should return 405 for non-POST methods', async () => {
+      const { req, res } = createMocks({
+        method: 'GET'
+      });
 
-  it('should validate item productId', async () => {
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        items: [
-          { quantity: 10 }
-        ]
-      }
-    });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(400);
-    const data = JSON.parse(res._getData());
-    expect(data.error).toBe('Invalid request');
-    expect(data.details).toContain('Each item must have a valid productId');
-  });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
 
-  it('should validate item quantity', async () => {
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        items: [
-          { productId: 'product-1', quantity: 0 }
-        ]
-      }
+      expect(res._getStatusCode()).toBe(405);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('method_not_allowed');
+      expect(data.message).toBe('Only POST method is allowed');
     });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(400);
-    const data = JSON.parse(res._getData());
-    expect(data.error).toBe('Invalid request');
-    expect(data.details).toContain('Each item must have a valid quantity greater than 0');
-  });
 
-  it('should handle database errors gracefully', async () => {
-    mockSupabase.from.mockReturnValue({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockResolvedValue({ data: null, error: { message: 'Database connection failed' } })
-        })
-      })
+    it('should return 401 when user is not authenticated', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: null
+      });
+      // Products mock should not be called
+      mockSupabase.from.mockImplementation(() => ({
+        select: jest.fn(() => ({ in: jest.fn() })),
+        insert: jest.fn(() => ({ select: jest.fn(() => ({ single: jest.fn() })) }))
+      }));
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: { items: [{ product_id: 'product-1', quantity: 1 }] }
+      });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+      expect(res._getStatusCode()).toBe(401);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('unauthorized');
+      expect(data.message).toBe('Authentication required');
     });
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        items: [
-          { productId: 'product-1', quantity: 10 }
-        ]
-      }
-    });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(500);
-    const data = JSON.parse(res._getData());
-    expect(data.error).toBe('Failed to create quote request');
-  });
 
-  it('should accept minimal valid request', async () => {
-    const mockQuote = {
-      id: 'minimal-quote-id',
-      status: 'requested'
-    };
-    mockSupabase.from.mockReturnValue({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockResolvedValue({ data: mockQuote, error: null })
-        })
-      })
+    it('should return 400 for missing request body', async () => {
+      const { req, res } = createMocks({ method: 'POST' });
+      // Remove the body property entirely to simulate missing body
+      delete req.body;
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+      expect(res._getStatusCode()).toBe(400);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('validation_error');
+      expect(data.message).toBe('Request body is required');
     });
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        items: [
-          { productId: 'product-1', quantity: 1 }
-        ]
-      }
-    });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(201);
-    const data = JSON.parse(res._getData());
-    expect(data.id).toBe('minimal-quote-id');
-    expect(data.status).toBe('requested');
-  });
 
-  it('should handle optional fields correctly', async () => {
-    const mockQuote = {
-      id: 'optional-fields-quote-id',
-      status: 'requested'
-    };
-    mockSupabase.from.mockReturnValue({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockResolvedValue({ data: mockQuote, error: null })
-        })
-      })
+    it('should return 400 for empty items array', async () => {
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          items: []
+        }
+      });
+
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+
+      expect(res._getStatusCode()).toBe(400);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('validation_error');
+      expect(data.message).toBe('At least one item is required');
     });
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        items: [
-          { productId: 'product-1', quantity: 5, notes: 'Optional notes' }
-        ],
-        companyName: 'Optional Company',
-        contactEmail: 'optional@company.com',
-        specialRequirements: 'Optional requirements'
-      }
+
+    it('should return 400 for invalid product_id', async () => {
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          items: [{ quantity: 1 }] // Missing product_id
+        }
+      });
+
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+
+      expect(res._getStatusCode()).toBe(400);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('validation_error');
+      expect(data.message).toBe('Item 1: product_id is required and must be a string');
     });
-    await handler(req, res);
-    expect(res._getStatusCode()).toBe(201);
-    const data = JSON.parse(res._getData());
-    expect(data.id).toBe('optional-fields-quote-id');
-    expect(data.status).toBe('requested');
+
+    it('should return 400 for invalid quantity', async () => {
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          items: [{ product_id: 'product-1', quantity: 0 }] // Invalid quantity
+        }
+      });
+
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+
+      expect(res._getStatusCode()).toBe(400);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('validation_error');
+      expect(data.message).toBe('Item 1: quantity must be a number greater than 0');
+    });
+
+    it('should return 404 when product is not found', async () => {
+      mockSupabase.from.mockImplementation((table) => {
+        if (table === 'products') {
+          return {
+            select: jest.fn(() => ({
+              in: jest.fn(() => ({
+                data: [{ id: 'product-1', name: 'Test Product 1', price: 29.99, inventory_count: 100 }],
+                error: null
+              }))
+            }))
+          };
+        }
+        return mockSupabase.from();
+      });
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: { items: [
+          { product_id: 'product-1', quantity: 1 },
+          { product_id: 'product-2', quantity: 1 }
+        ] }
+      });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+      expect(res._getStatusCode()).toBe(404);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('not_found');
+      expect(data.message).toBe('Product(s) not found: product-2');
+    });
+
+    it('should return 409 when product is out of stock', async () => {
+      mockSupabase.from.mockImplementation((table) => {
+        if (table === 'products') {
+          return {
+            select: jest.fn(() => ({
+              in: jest.fn(() => ({
+                data: [{ id: 'product-1', name: 'Test Product 1', price: 29.99, inventory_count: 3 }],
+                error: null
+              }))
+            }))
+          };
+        }
+        return mockSupabase.from();
+      });
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: { items: [{ product_id: 'product-1', quantity: 5 }] }
+      });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+      expect(res._getStatusCode()).toBe(409);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('out_of_stock');
+      expect(data.message).toBe('Only 3 units available for Test Product 1');
+    });
+
+    it('should return 500 when database error occurs during product fetch', async () => {
+      mockSupabase.from.mockImplementation((table) => {
+        if (table === 'products') {
+          return {
+            select: jest.fn(() => ({
+              in: jest.fn(() => ({
+                data: null,
+                error: new Error('Database connection failed')
+              }))
+            }))
+          };
+        }
+        return mockSupabase.from();
+      });
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: { items: [{ product_id: 'product-1', quantity: 1 }] }
+      });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+      expect(res._getStatusCode()).toBe(500);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('internal');
+      expect(data.message).toBe('Database error while fetching products');
+    });
+
+    it('should return 500 when database error occurs during quote insertion', async () => {
+      mockSupabase.from.mockImplementation((table) => {
+        if (table === 'products') {
+          return {
+            select: jest.fn(() => ({
+              in: jest.fn(() => ({
+                data: [{ id: 'product-1', name: 'Test Product 1', price: 29.99, inventory_count: 100 }],
+                error: null
+              }))
+            }))
+          };
+        } else if (table === 'quotes') {
+          return {
+            insert: jest.fn(() => ({
+              select: jest.fn(() => ({
+                single: jest.fn(() => ({
+                  data: null,
+                  error: new Error('Insert failed')
+                }))
+              }))
+            }))
+          };
+        }
+        return mockSupabase.from();
+      });
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: { items: [{ product_id: 'product-1', quantity: 1 }] }
+      });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+      expect(res._getStatusCode()).toBe(500);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('internal');
+      expect(data.message).toBe('Database error while creating quote request');
+    });
+
+    it('should handle optional fields correctly', async () => {
+      mockSupabase.from.mockImplementation((table) => {
+        if (table === 'products') {
+          return {
+            select: jest.fn(() => ({
+              in: jest.fn(() => ({
+                data: [
+                  { id: 'product-1', name: 'Test Product 1', price: 29.99, inventory_count: 100 },
+                  { id: 'product-2', name: 'Test Product 2', price: 49.99, inventory_count: 50 }
+                ],
+                error: null
+              }))
+            }))
+          };
+        } else if (table === 'quotes') {
+          return {
+            insert: jest.fn(() => ({
+              select: jest.fn(() => ({
+                single: jest.fn(() => ({
+                  data: { id: 'test-quote-id' },
+                  error: null
+                }))
+              }))
+            }))
+          };
+        }
+        return mockSupabase.from();
+      });
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          items: [
+            { product_id: 'product-1', quantity: 1 },
+            { product_id: 'product-2', quantity: 1 }
+          ],
+          company_name: 'Test Co',
+          contact_name: 'Alice',
+          contact_email: 'alice@example.com',
+          contact_phone: '123-456-7890',
+          additional_notes: 'Please call before delivery.'
+        }
+      });
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+      expect(res._getStatusCode()).toBe(201);
+      const data = JSON.parse(res._getData());
+      expect(data.success).toBe(true);
+      expect(data.quote_id).toBe('test-quote-id');
+      expect(data.message).toBe('Quote request submitted successfully');
+    });
+
+    it('should validate quantity maximum limit', async () => {
+      const { req, res } = createMocks({
+        method: 'POST',
+        body: {
+          items: [{ product_id: 'product-1', quantity: 1000 }] // Exceeds 999 limit
+        }
+      });
+
+      const handler = require('../../../pages/api/quotes/request').default;
+      await handler(req, res);
+
+      expect(res._getStatusCode()).toBe(400);
+      const data = JSON.parse(res._getData());
+      expect(data.error).toBe('validation_error');
+      expect(data.message).toBe('Item 1: quantity cannot exceed 999');
+    });
   });
 }); 
