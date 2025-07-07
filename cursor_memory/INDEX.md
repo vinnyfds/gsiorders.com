@@ -178,3 +178,9 @@ This index tracks key decisions, patterns, and lessons learned during gsiorders.
 ## Resources
 
 - **TESTING_LINKSgpt.md** - Testing resources and documentation links
+
+- [2025-01-06_e2e-setup.md](problems/2025-01-06_e2e-setup.md) — Playwright E2E setup, selector, and redirect issues
+- [2025-01-06_e2e-setup.sh](commands/2025-01-06_e2e-setup.sh) — All Playwright E2E setup and test commands
+
+## Configuration Files
+- **.env.example** - Environment variable template with Supabase, Stripe, AWS, and development configuration
