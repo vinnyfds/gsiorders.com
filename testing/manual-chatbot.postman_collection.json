@@ -1,0 +1,334 @@
+{
+  "info": {
+    "name": "GSI Orders - Chatbot API",
+    "description": "Manual testing collection for the chatbot endpoint with streaming and non-streaming capabilities",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Chatbot - Basic Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"liquidheaven\",\n  \"userQuestion\": \"What CBD products do you recommend for sleep?\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chatbot",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chatbot"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chatbot - Motaquila Brand",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"motaquila\",\n  \"userQuestion\": \"Tell me about your premium tequila selection\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chatbot",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chatbot"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chatbot - Last Genie Brand",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"lastgenie\",\n  \"userQuestion\": \"What specialty products do you offer?\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chatbot",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chatbot"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chatbot - With Page Context",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"liquidheaven\",\n  \"pageContext\": \"Product page for CBD Sleep Tincture\",\n  \"userQuestion\": \"How should I use this product?\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chatbot",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chatbot"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chatbot - Default Brand (No Brand Specified)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userQuestion\": \"Hello, can you help me?\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chatbot",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chatbot"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chatbot - Streaming Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "text/event-stream"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"motaquila\",\n  \"userQuestion\": \"Give me a detailed explanation of your premium tequila collection and cocktail recommendations\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chatbot",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chatbot"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chatbot - Validation Tests",
+      "item": [
+        {
+          "name": "Missing userQuestion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand\": \"liquidheaven\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Empty userQuestion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userQuestion\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "userQuestion Too Long",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userQuestion\": \"This is a very long question that exceeds the 1000 character limit. \" + \"a\".repeat(1000)\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Brand Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand\": 123,\n  \"userQuestion\": \"Hello\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid PageContext Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageContext\": 456,\n  \"userQuestion\": \"Hello\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chatbot - Method Tests",
+      "item": [
+        {
+          "name": "GET Method (Should Fail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Method (Should Fail)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userQuestion\": \"Hello\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chatbot - Error Handling Tests",
+      "item": [
+        {
+          "name": "Invalid Brand (Should Default)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand\": \"invalidbrand\",\n  \"userQuestion\": \"Hello\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chatbot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chatbot"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+} 
