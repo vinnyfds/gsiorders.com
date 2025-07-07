@@ -1,6 +1,6 @@
 import { createMocks } from "node-mocks-http";
 import handler from "../../pages/api/wishlist";
-import { mockFail } from "../../__mocks__/@supabase/supabase-js";
+import { mockFail, __getMem } from "../../__mocks__/@supabase/supabase-js";
 
 describe("Wishlist API", () => {
   beforeEach(() => {
@@ -97,6 +97,8 @@ describe("Wishlist API", () => {
       });
 
       it("handles product already in wishlist", async () => {
+        const mem = __getMem();
+        mem.wishlist_items.push({ user_id: "123e4567-e89b-12d3-a456-426614174000", product_id: "p1" });
         const { req, res } = createMocks({
           method: "POST",
           body: {
@@ -104,18 +106,21 @@ describe("Wishlist API", () => {
             action: "add"
           }
         });
-
-        // Mock existing wishlist item
-        mockFail("already-in-wishlist");
-
         await handler(req, res);
-        // TODO: when API distinguishes 409 vs 404, update this assert
-        expect(res._getStatusCode()).toBe(404);
+        expect(res._getStatusCode()).toBe(409);
         const response = JSON.parse(res._getData());
-        expect(response.error).toBe("Product not found");
+        expect(response.error).toBe("Product already in wishlist");
+        expect(response.isSaved).toBe(true);
+        mem.wishlist_items.length = 0; // cleanup
       });
 
       it("handles insert error when adding", async () => {
+        const mem = __getMem();
+        mem.wishlist_items.length = 0;
+        // Ensure product exists
+        if (!mem.products.find(p => p.id === "p1")) {
+          mem.products.push({ id: "p1", name: "Test Product" });
+        }
         const { req, res } = createMocks({
           method: "POST",
           body: {
@@ -123,13 +128,9 @@ describe("Wishlist API", () => {
             action: "add"
           }
         });
-
-        // Mock insert error
         mockFail("insert-error");
-
         await handler(req, res);
-        // TODO: when API distinguishes 500 vs 404, update this assert
-        expect(res._getStatusCode()).toBe(404);
+        expect(res._getStatusCode()).toBe(404); // TODO: change to 500 when handler distinguishes errors
         expect(JSON.parse(res._getData())).toMatchObject({
           error: "Product not found"
         });
@@ -138,6 +139,8 @@ describe("Wishlist API", () => {
 
     describe("Remove from wishlist", () => {
       it("removes product from wishlist successfully", async () => {
+        const mem = __getMem();
+        mem.wishlist_items.push({ user_id: "123e4567-e89b-12d3-a456-426614174000", product_id: "p1" });
         const { req, res } = createMocks({
           method: "POST",
           body: {
@@ -145,14 +148,18 @@ describe("Wishlist API", () => {
             action: "remove"
           }
         });
-
-        // This will fail due to mock limitations, so expect 500
         await handler(req, res);
-        // TODO: when API supports this, update this assert
-        expect(res._getStatusCode()).toBe(500);
+        expect(res._getStatusCode()).toBe(200);
+        const response = JSON.parse(res._getData());
+        expect(response.success).toBe(true);
+        expect(response.isSaved).toBe(false);
+        expect(response.message).toContain("Removed");
+        mem.wishlist_items.length = 0; // cleanup
       });
 
       it("handles item not found in wishlist", async () => {
+        const mem = __getMem();
+        mem.wishlist_items.length = 0;
         const { req, res } = createMocks({
           method: "POST",
           body: {
@@ -160,18 +167,20 @@ describe("Wishlist API", () => {
             action: "remove"
           }
         });
-
-        // Mock item not found
-        mockFail("item-not-found");
-
         await handler(req, res);
-        // TODO: when API distinguishes item not found, update this assert
         expect(res._getStatusCode()).toBe(404);
         const response = JSON.parse(res._getData());
-        expect(response.error).toBe("Product not found");
+        expect(response.error).toBe("Item not found in wishlist");
+        expect(response.isSaved).toBe(false);
       });
 
       it("handles delete error when removing", async () => {
+        const mem = __getMem();
+        mem.wishlist_items.push({ user_id: "123e4567-e89b-12d3-a456-426614174000", product_id: "p1" });
+        // Ensure product exists
+        if (!mem.products.find(p => p.id === "p1")) {
+          mem.products.push({ id: "p1", name: "Test Product" });
+        }
         const { req, res } = createMocks({
           method: "POST",
           body: {
@@ -179,16 +188,13 @@ describe("Wishlist API", () => {
             action: "remove"
           }
         });
-
-        // Mock delete error
         mockFail("delete-error");
-
         await handler(req, res);
-        // TODO: when API distinguishes 500 vs 404, update this assert
-        expect(res._getStatusCode()).toBe(404);
+        expect(res._getStatusCode()).toBe(404); // TODO: change to 500 when handler distinguishes errors
         expect(JSON.parse(res._getData())).toMatchObject({
           error: "Product not found"
         });
+        mem.wishlist_items.length = 0; // cleanup
       });
     });
 
@@ -249,6 +255,12 @@ describe("Wishlist API", () => {
     });
 
     it("handles general error in toggleWishlist", async () => {
+      const mem = __getMem();
+      mem.wishlist_items.length = 0;
+      // Ensure product exists
+      if (!mem.products.find(p => p.id === "p1")) {
+        mem.products.push({ id: "p1", name: "Test Product" });
+      }
       const { req, res } = createMocks({
         method: "POST",
         body: {
@@ -256,13 +268,9 @@ describe("Wishlist API", () => {
           action: "add"
         }
       });
-
-      // Mock general error
       mockFail("general-error");
-
       await handler(req, res);
-      // TODO: when API distinguishes 500 vs 404, update this assert
-      expect(res._getStatusCode()).toBe(404);
+      expect(res._getStatusCode()).toBe(404); // TODO: change to 500 when handler distinguishes errors
       expect(JSON.parse(res._getData())).toMatchObject({
         error: "Product not found"
       });
@@ -296,6 +304,23 @@ describe("Wishlist API", () => {
       expect(JSON.parse(res._getData())).toMatchObject({
         error: "Method not allowed"
       });
+    });
+  });
+
+  describe("Security", () => {
+    it("rejects SQL injection/XSS in productId", async () => {
+      const { req, res } = createMocks({
+        method: "POST",
+        body: {
+          productId: "' OR 1=1; <script>alert(1)</script>",
+          action: "add"
+        }
+      });
+      await handler(req, res);
+      // Should return 404 (product not found) or 400 (invalid input)
+      expect([400, 404]).toContain(res._getStatusCode());
+      const data = JSON.parse(res._getData());
+      expect(data.error).toMatch(/not found|invalid/i);
     });
   });
 }); 
