@@ -77,7 +77,7 @@ async function toggleWishlist(req: NextApiRequest, res: NextApiResponse) {
     if (action === 'add') {
       if (isCurrentlyInWishlist) {
         return res.status(409).json({ 
-          error: 'Product is already in wishlist',
+          error: 'Product already in wishlist',
           isSaved: true 
         });
       }
@@ -92,7 +92,7 @@ async function toggleWishlist(req: NextApiRequest, res: NextApiResponse) {
 
       if (insertError) {
         console.error('❌ Error adding to wishlist:', insertError);
-        return res.status(500).json({ error: 'Failed to add to wishlist' });
+        return res.status(500).json({ error: 'Internal server error' });
       }
 
       console.log('✅ Added to wishlist:', product.name);
@@ -106,7 +106,7 @@ async function toggleWishlist(req: NextApiRequest, res: NextApiResponse) {
     } else { // action === 'remove'
       if (!isCurrentlyInWishlist) {
         return res.status(404).json({ 
-          error: 'Product is not in wishlist',
+          error: 'Item not found in wishlist',
           isSaved: false 
         });
       }
@@ -120,7 +120,7 @@ async function toggleWishlist(req: NextApiRequest, res: NextApiResponse) {
 
       if (deleteError) {
         console.error('❌ Error removing from wishlist:', deleteError);
-        return res.status(500).json({ error: 'Failed to remove from wishlist' });
+        return res.status(500).json({ error: 'Internal server error' });
       }
 
       console.log('✅ Removed from wishlist:', product.name);
@@ -145,8 +145,16 @@ async function getUserWishlist(req: NextApiRequest, res: NextApiResponse) {
     // For now, use test user ID (in production, get from auth)
     const userId = '123e4567-e89b-12d3-a456-426614174000';
 
-    const pageNum = parseInt(page as string) || 1;
-    const limitNum = parseInt(limit as string) || 20;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+
+    // Validate pagination parameters
+    if (isNaN(pageNum) || isNaN(limitNum) || 
+        pageNum < 1 || pageNum > 100 || 
+        limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({ error: 'Invalid pagination parameters' });
+    }
+
     const offset = (pageNum - 1) * limitNum;
 
     console.log('📋 Fetching wishlist for user:', userId, 'page:', pageNum);
@@ -173,7 +181,7 @@ async function getUserWishlist(req: NextApiRequest, res: NextApiResponse) {
 
     if (wishlistError) {
       console.error('❌ Error fetching wishlist:', wishlistError);
-      return res.status(500).json({ error: 'Failed to fetch wishlist' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     // Get total count for pagination
@@ -184,7 +192,7 @@ async function getUserWishlist(req: NextApiRequest, res: NextApiResponse) {
 
     if (countError) {
       console.error('❌ Error counting wishlist items:', countError);
-      return res.status(500).json({ error: 'Failed to count wishlist items' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     // Transform the data to match expected format
@@ -201,7 +209,7 @@ async function getUserWishlist(req: NextApiRequest, res: NextApiResponse) {
         page: pageNum,
         limit: limitNum,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / limitNum)
+        totalPages: count ? Math.ceil(count / limitNum) : null
       },
       totalItems: count || 0
     });

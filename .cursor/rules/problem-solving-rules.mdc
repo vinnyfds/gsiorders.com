@@ -111,6 +111,24 @@ Append this bullet to the footer used in every micro-task prompt:
 
 **Effect:** Cursor AI now guards against unnecessary token spend while still producing the code, test link, and concise report needed for gsiorders.com.
 
+------------------------------------------------------------------------------------------------
+
+### ➕ **New Rule — P-15 Command-History Ledger**
+
+> *Goal: guarantee each micro-task **remembers every shell / CLI command** it executed to validate a result, so later tasks (and humans) can replay, debug, or extend them.*
+
+| #                               | Rule                                                                               | Cursor AI must…                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Implementation details                                                                                                                                                                                                                                        |
+| ------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P-15 Command-History Ledger** | Persist every command (and its intent) that was typed or scripted during the task. | 1. **Log immediately:**<br>  • Capture each command string at the moment it is shown in the prompt or executed in a script.<br>  • Prepend a terse comment (`# purpose …`, ≤ 8 words).<br>2. **Store per-task script:**<br>  • After finishing the task, append the collected commands to `/cursor_memory/commands/YYYY-MM-DD_<task-slug>.sh`.<br>  • If the file already exists, de-dupe identical commands.<br>3. **Index update:** add the script path to `/cursor_memory/INDEX.md` under a “Commands” sub-section (re-use **P-14 Project Memory Ledger** indexing pattern).<br>4. **Pre-task recall:** before running any new command, scan previous command scripts for a match; **reuse** the exact command when possible instead of inventing a new variant.<br>5. **Report link:** in every `### Cursor AI Report`, include `CommandScript: /cursor_memory/commands/YYYY-MM-DD_<task-slug>.sh`. | • **Token-efficient:** store commands as plain text; no extra narrative.<br>• **Cross-OS:** use POSIX-style syntax where possible; when PowerShell is required, prefix `# pwsh`.<br>• **Security:** redact secrets (`$SUPABASE_SERVICE_KEY` ⇒ `$ENV_SECRET`). |
+
+#### 📥 **Add to Standard Prompt Footer**
+
+```
+- Apply P-15 Command-History Ledger: log every CLI command to /cursor_memory/commands and reference it in the report.
+```
+
+This dovetails with the existing **P-14 Project Memory Ledger** folder structure and keeps command knowledge durable across all future Cursor AI micro-tasks .
+
 
 ---
 #### ⚙️ Standard Prompt Footer (attach to *every* Cursor AI task)

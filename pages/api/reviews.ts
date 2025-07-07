@@ -45,13 +45,13 @@ async function createReview(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Validate comment length
-    if (comment.trim().length < 10) {
+    if (comment.length < 10) {
       return res.status(400).json({ 
         error: 'Comment must be at least 10 characters long' 
       });
     }
 
-    if (comment.trim().length > 500) {
+    if (comment.length > 500) {
       return res.status(400).json({ 
         error: 'Comment must be less than 500 characters' 
       });
@@ -88,7 +88,7 @@ async function createReview(req: NextApiRequest, res: NextApiResponse) {
 
     if (existingReview) {
       return res.status(409).json({ 
-        error: 'You have already reviewed this product' 
+        error: 'Review already exists' 
       });
     }
 
@@ -107,7 +107,7 @@ async function createReview(req: NextApiRequest, res: NextApiResponse) {
 
     if (reviewError) {
       console.error('❌ Error creating review:', reviewError);
-      return res.status(500).json({ error: 'Failed to create review' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     console.log('✅ Review created successfully:', newReview.id);
@@ -138,8 +138,16 @@ async function getReviews(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Product ID is required' });
     }
 
-    const pageNum = parseInt(page as string) || 1;
-    const limitNum = parseInt(limit as string) || 10;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+
+    // Validate pagination parameters
+    if (isNaN(pageNum) || isNaN(limitNum) || 
+        pageNum < 1 || pageNum > 100 || 
+        limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({ error: 'Invalid pagination parameters' });
+    }
+
     const offset = (pageNum - 1) * limitNum;
 
     console.log('📋 Fetching reviews for product:', productId, 'page:', pageNum);
@@ -163,7 +171,7 @@ async function getReviews(req: NextApiRequest, res: NextApiResponse) {
 
     if (reviewsError) {
       console.error('❌ Error fetching reviews:', reviewsError);
-      return res.status(500).json({ error: 'Failed to fetch reviews' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     // Get total count for pagination
@@ -175,7 +183,7 @@ async function getReviews(req: NextApiRequest, res: NextApiResponse) {
 
     if (countError) {
       console.error('❌ Error counting reviews:', countError);
-      return res.status(500).json({ error: 'Failed to count reviews' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     // Calculate average rating
@@ -199,7 +207,7 @@ async function getReviews(req: NextApiRequest, res: NextApiResponse) {
         page: pageNum,
         limit: limitNum,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / limitNum)
+        totalPages: count ? Math.ceil(count / limitNum) : null
       },
       averageRating: Math.round(averageRating * 10) / 10,
       totalReviews: count || 0

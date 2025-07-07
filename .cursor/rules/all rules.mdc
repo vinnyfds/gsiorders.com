@@ -3182,3 +3182,32 @@ const testFailureProtocol = {
 **🎯 Cursor AI will now NEVER proceed without complete testing validation at every level!**
 
 
+-----------------------------------------------------------------------------------------------
+
+# R-23  Problem-Solution Knowledge Log
+After ALL tests pass and coverage gates are met:
+
+1. Create (or append to)  
+   cursor_memory/problems/YYYY-MM-DD_<task-slug>.md
+
+2. The file MUST contain 2 sections:
+   ## Problem
+   – One-paragraph statement of the bug / failing scenario.
+   – Key symptoms (test errors, stack traces, coverage %).
+
+   ## Solution
+   – Clear description of the fix (code, config, mock tweak).
+   – Exact files/tactics changed.
+   – If a follow-up TODO is left, note it here.
+
+3. Update cursor_memory/INDEX.md:
+   – Add a bullet linking to the new problem file.
+   – Include tags (e.g., “jest-config”, “supabase-mock”, “wishlist-api”).
+
+4. Log the CLI commands used for this fix in the P-15 command ledger
+   (same date/task slug).
+
+5. Mention the new problem file in the “### Cursor AI Report”
+   under **Files Created/Updated**.
+
+**No exceptions**: Every task that reaches a green suite must follow steps 1–5 before push.

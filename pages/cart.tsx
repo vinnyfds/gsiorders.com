@@ -175,7 +175,7 @@ const CartPage = () => {
 
               <div className="divide-y divide-gray-200">
                 {cart.items.map((item) => (
-                  <div key={item.id} className="p-6">
+                  <div key={item.id} className="p-6" data-testid="cart-item">
                     <div className="flex items-start space-x-4">
                       {/* Product Image with Error Handling */}
                       <div className="flex-shrink-0">
@@ -327,6 +327,7 @@ const CartPage = () => {
               <div className="space-y-3">
                 <button
                   className="w-full bg-blue-600 text-white text-center py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="proceed-to-checkout-btn"
                   onClick={handleCheckout}
                   disabled={isCheckingOut || cart.items.length === 0}
                 >

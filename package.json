@@ -11,6 +11,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts",
+    "test:e2e:watch": "jest --config jest.e2e.config.js --watch",
     "type-check": "tsc --noEmit"
   },
   "repository": {
@@ -34,6 +36,7 @@
   },
   "description": "",
   "devDependencies": {
+    "@playwright/test": "^1.53.2",
     "@tailwindcss/postcss": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -43,8 +46,10 @@
     "@types/react": "^19.1.8",
     "@types/supertest": "^6.0.3",
     "autoprefixer": "^10.4.21",
+    "dotenv": "^17.0.1",
     "jest": "^30.0.4",
     "jest-environment-jsdom": "^30.0.4",
+    "msw": "^2.10.3",
     "node-mocks-http": "^1.17.2",
     "postcss": "^8.5.6",
     "supertest": "^7.1.1",
