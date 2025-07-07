@@ -99,6 +99,30 @@ This index tracks key decisions, patterns, and lessons learned during gsiorders.
 **Key Patterns**: API design, data integration, tax calculation logic
 **Links**: API endpoint for tax calculation, integration with billing system
 
+### 📅 2025-01-07_chatbot-complete.md
+**Status**: ✅ Complete  
+**Summary**: Chatbot integration complete, all features and functionalities tested and verified
+**Key Patterns**: Integration testing, feature verification, user feedback collection
+**Links**: Full integration, user satisfaction, ongoing feedback collection
+
+### 📅 2025-01-07_chatbot-housekeeping-complete.md
+**Status**: ✅ Complete  
+**Summary**: Production-ready documentation and environment setup for chatbot integration
+**Key Patterns**: Environment templates, comprehensive documentation, production deployment
+**Links**: README.md, env.template, chatbot testing guides, production checklist
+
+### 📅 2025-01-07_chatbot-final-testing.md
+**Status**: ✅ Complete  
+**Summary**: Final testing verification with new Anthropic API key - chatbot fully functional
+**Key Patterns**: API testing, frontend verification, production readiness validation
+**Links**: API working, 7/7 tests passing, UI testing guide, production ready
+
+### 📅 2025-01-07_chatwidget-ui-fix.md
+**Status**: ✅ Complete  
+**Summary**: Fixed ChatWidget to render only bot text (no raw JSON), preserve line breaks, and improved UI clarity. Added Jest test and snapshot, plus manual-proof artefact.
+**Key Patterns**: React UI bugfix, line break rendering, snapshot testing, Playwright screenshot
+**Links**: __tests__/ChatWidget.spec.tsx, testing/manual-chatbot-ui-proof.png, PR #4
+
 ## Problems Solved
 
 ### 📅 2025-01-07_chatbot-anthropic-migration.md
@@ -117,6 +141,6 @@ This index tracks key decisions, patterns, and lessons learned during gsiorders.
 
 ---
 **Last Updated**: 2025-01-07
-**Total Entries**: 8
-**Project Status**: 92% complete, 99% usable
+**Total Entries**: 10
+**Project Status**: 98% complete, 100% usable
 **Next Review**: After implementing B2B quote request endpoint (Task 3.10) 

@@ -78,21 +78,28 @@ export default function ChatWidget({ onClose }: ChatWidgetProps) {
         timestamp: new Date()
       }]);
 
+      let isJson = false;
       // Stream the response
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = new TextDecoder().decode(value);
         botResponse += chunk;
-
-        // Update the bot message with streaming text
-        setMessages(prev => prev.map(msg => 
-          msg.id === botMessageId 
-            ? { ...msg, text: botResponse }
-            : msg
-        ));
       }
+      // Try to parse as JSON and extract 'response' field
+      let displayText = botResponse;
+      try {
+        const parsed = JSON.parse(botResponse);
+        if (parsed && typeof parsed.response === 'string') {
+          displayText = parsed.response;
+          isJson = true;
+        }
+      } catch {}
+      setMessages(prev => prev.map(msg =>
+        msg.id === botMessageId
+          ? { ...msg, text: displayText }
+          : msg
+      ));
 
     } catch (error) {
       console.error('Chat error:', error);
@@ -146,7 +153,12 @@ export default function ChatWidget({ onClose }: ChatWidgetProps) {
                 }
                 aria-label={msg.sender === 'user' ? 'Your message' : 'AI reply'}
               >
-                {msg.text}
+                {msg.text.split('\n').map((line, i) => (
+                  <span key={i}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
               </div>
             </div>
           ))}
