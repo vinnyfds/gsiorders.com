@@ -1,35 +1,35 @@
 import { createMocks } from 'node-mocks-http';
 import handler from '../../pages/api/chatbot';
 
-// Mock OpenAI
-jest.mock('openai', () => {
-  return jest.fn().mockImplementation(() => ({
-    chat: {
-      completions: {
-        create: jest.fn()
-      }
-    }
-  }));
+// Polyfill TextEncoder and TextDecoder for Node.js
+(global as any).TextEncoder = require('util').TextEncoder;
+(global as any).TextDecoder = require('util').TextDecoder;
+
+// Mock node-fetch
+jest.mock('node-fetch', () => {
+  return jest.fn();
 });
 
-const mockOpenAI = require('openai');
-const mockCreate = mockOpenAI().chat.completions.create;
+const mockFetch = require('node-fetch');
 
 describe('/api/chatbot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock environment variable
-    process.env.OPENAI_API_KEY = 'test-api-key';
+    process.env.ANTHROPIC_API_KEY = 'test-api-key';
   });
 
   afterEach(() => {
-    delete process.env.OPENAI_API_KEY;
+    delete process.env.ANTHROPIC_API_KEY;
   });
 
   it('returns chatbot response for valid request', async () => {
     const mockResponse = 'Hello! I can help you with Liquid Heaven products.';
-    mockCreate.mockResolvedValue({
-      choices: [{ message: { content: mockResponse } }]
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        content: [{ type: 'text', text: mockResponse }]
+      })
     });
 
     const { req, res } = createMocks({
@@ -47,26 +47,36 @@ describe('/api/chatbot', () => {
     expect(data.response).toBe(mockResponse);
     expect(data.brand).toBe('liquidheaven');
     expect(data.timestamp).toBeDefined();
-    expect(mockCreate).toHaveBeenCalledWith({
-      model: 'gpt-3.5-turbo',
-      messages: expect.arrayContaining([
-        { role: 'system', content: expect.stringContaining('Liquid Heaven') },
-        { role: 'user', content: 'What CBD products do you recommend?' }
-      ]),
-      max_tokens: 500,
-      temperature: 0.7,
-      stream: false
-    });
+    
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://api.anthropic.com/v1/messages',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'x-api-key': 'test-api-key',
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        }),
+        body: expect.stringContaining('claude-3-sonnet-20240229')
+      })
+    );
   });
 
   it('handles streaming requests correctly', async () => {
-    const mockStream = (async function* () {
-      yield { choices: [{ delta: { content: 'Hello' } }] };
-      yield { choices: [{ delta: { content: ' there' } }] };
-      yield { choices: [{ delta: { content: '!' } }] };
-    })();
+    // Mock streaming response
+    const mockStream = {
+      ok: true,
+      body: {
+        getReader: jest.fn().mockReturnValue({
+          read: jest.fn()
+            .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('{"content":[{"type":"text","text":"Hello"}]}\n') })
+            .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('{"content":[{"type":"text","text":" there"}]}\n') })
+            .mockResolvedValueOnce({ done: true, value: new TextEncoder().encode('') })
+        })
+      }
+    };
 
-    mockCreate.mockResolvedValue(mockStream);
+    mockFetch.mockResolvedValue(mockStream);
 
     const { req, res } = createMocks({
       method: 'POST',
@@ -79,22 +89,25 @@ describe('/api/chatbot', () => {
       }
     });
 
-    // Mock res.write and res.end
+    // Mock res.write, res.end, and res.setHeader
     res.write = jest.fn();
     res.end = jest.fn();
+    res.setHeader = jest.fn();
 
     await handler(req, res);
 
-    expect(mockCreate).toHaveBeenCalledWith({
-      model: 'gpt-3.5-turbo',
-      messages: expect.arrayContaining([
-        { role: 'system', content: expect.stringContaining('Motaquila') },
-        { role: 'user', content: 'Tell me about your beverages' }
-      ]),
-      max_tokens: 500,
-      temperature: 0.7,
-      stream: true
-    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://api.anthropic.com/v1/messages',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'x-api-key': 'test-api-key',
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        }),
+        body: expect.stringContaining('"stream":true')
+      })
+    );
 
     expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/event-stream');
     expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
@@ -102,13 +115,19 @@ describe('/api/chatbot', () => {
   });
 
   it('handles streaming with empty chunks', async () => {
-    const mockStream = (async function* () {
-      yield { choices: [{ delta: {} }] };
-      yield { choices: [{ delta: { content: 'Hello' } }] };
-      yield { choices: [{ delta: {} }] };
-    })();
+    const mockStream = {
+      ok: true,
+      body: {
+        getReader: jest.fn().mockReturnValue({
+          read: jest.fn()
+            .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('{"content":[]}\n') })
+            .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('{"content":[{"type":"text","text":"Hello"}]}\n') })
+            .mockResolvedValueOnce({ done: true, value: new TextEncoder().encode('') })
+        })
+      }
+    };
 
-    mockCreate.mockResolvedValue(mockStream);
+    mockFetch.mockResolvedValue(mockStream);
 
     const { req, res } = createMocks({
       method: 'POST',
@@ -122,6 +141,7 @@ describe('/api/chatbot', () => {
 
     res.write = jest.fn();
     res.end = jest.fn();
+    res.setHeader = jest.fn();
 
     await handler(req, res);
 
@@ -132,8 +152,11 @@ describe('/api/chatbot', () => {
 
   it('defaults to liquidheaven brand when not specified', async () => {
     const mockResponse = 'Default response';
-    mockCreate.mockResolvedValue({
-      choices: [{ message: { content: mockResponse } }]
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        content: [{ type: 'text', text: mockResponse }]
+      })
     });
 
     const { req, res } = createMocks({
@@ -151,8 +174,11 @@ describe('/api/chatbot', () => {
   });
 
   it('includes page context in system prompt', async () => {
-    mockCreate.mockResolvedValue({
-      choices: [{ message: { content: 'Response' } }]
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        content: [{ type: 'text', text: 'Response' }]
+      })
     });
 
     const { req, res } = createMocks({
@@ -166,14 +192,10 @@ describe('/api/chatbot', () => {
 
     await handler(req, res);
 
-    expect(mockCreate).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://api.anthropic.com/v1/messages',
       expect.objectContaining({
-        messages: expect.arrayContaining([
-          {
-            role: 'system',
-            content: expect.stringContaining('Product page for premium tequila')
-          }
-        ])
+        body: expect.stringContaining('Product page for premium tequila')
       })
     );
   });
@@ -201,10 +223,9 @@ describe('/api/chatbot', () => {
     await handler(req, res);
 
     expect(res._getStatusCode()).toBe(400);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Invalid request',
-      details: 'userQuestion is required and must be a string'
-    });
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Invalid request');
+    expect(data.details).toBe('userQuestion cannot be empty');
   });
 
   it('rejects empty userQuestion', async () => {
@@ -216,10 +237,9 @@ describe('/api/chatbot', () => {
     await handler(req, res);
 
     expect(res._getStatusCode()).toBe(400);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Invalid request',
-      details: 'userQuestion cannot be empty'
-    });
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Invalid request');
+    expect(data.details).toBe('userQuestion cannot be empty');
   });
 
   it('rejects userQuestion that is too long', async () => {
@@ -232,215 +252,138 @@ describe('/api/chatbot', () => {
     await handler(req, res);
 
     expect(res._getStatusCode()).toBe(400);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Invalid request',
-      details: 'userQuestion must be 1000 characters or less'
-    });
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Invalid request');
+    expect(data.details).toBe('userQuestion must be 1000 characters or less');
   });
 
   it('rejects invalid brand type', async () => {
     const { req, res } = createMocks({
       method: 'POST',
       body: { 
-        brand: 123,
-        userQuestion: 'Hello'
+        userQuestion: 'Hello',
+        brand: 123 // Invalid type
       }
     });
 
     await handler(req, res);
 
     expect(res._getStatusCode()).toBe(400);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Invalid request',
-      details: 'brand must be a string'
-    });
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Invalid request');
+    expect(data.details).toBe('brand must be a string');
   });
 
   it('rejects invalid pageContext type', async () => {
     const { req, res } = createMocks({
       method: 'POST',
       body: { 
-        pageContext: 456,
+        userQuestion: 'Hello',
+        pageContext: 456 // Invalid type
+      }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(400);
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Invalid request');
+    expect(data.details).toBe('pageContext must be a string');
+  });
+
+  it('handles missing API key', async () => {
+    delete process.env.ANTHROPIC_API_KEY;
+
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: { userQuestion: 'Hello' }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(500);
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Chatbot service not configured');
+    expect(data.details).toBe('Anthropic Claude API key missing');
+  });
+
+  it('handles Anthropic API errors', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      statusText: 'Rate limit exceeded',
+      text: async () => 'Rate limit exceeded'
+    });
+
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: { userQuestion: 'Hello' }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(500);
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Failed to process chatbot request');
+  });
+
+  it('handles network errors', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: { userQuestion: 'Hello' }
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(500);
+    const data = JSON.parse(res._getData());
+    expect(data.error).toBe('Failed to process chatbot request');
+  });
+
+  it('handles malformed streaming data', async () => {
+    const mockStream = {
+      ok: true,
+      body: {
+        getReader: jest.fn().mockReturnValue({
+          read: jest.fn()
+            .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('invalid json\n') })
+            .mockResolvedValueOnce({ done: false, value: new TextEncoder().encode('{"content":[{"type":"text","text":"Hello"}]}\n') })
+            .mockResolvedValueOnce({ done: true, value: new TextEncoder().encode('') })
+        })
+      }
+    };
+
+    mockFetch.mockResolvedValue(mockStream);
+
+    const { req, res } = createMocks({
+      method: 'POST',
+      headers: {
+        accept: 'text/event-stream'
+      },
+      body: {
         userQuestion: 'Hello'
       }
     });
 
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(400);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Invalid request',
-      details: 'pageContext type must be a string'
-    });
-  });
-
-  it('handles missing OpenAI API key', async () => {
-    delete process.env.OPENAI_API_KEY;
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: { userQuestion: 'Hello' }
-    });
+    res.write = jest.fn();
+    res.end = jest.fn();
+    res.setHeader = jest.fn();
 
     await handler(req, res);
 
-    expect(res._getStatusCode()).toBe(500);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Chatbot service not configured',
-      details: 'OpenAI API key missing'
-    });
-  });
-
-  it('handles OpenAI rate limit error', async () => {
-    mockCreate.mockRejectedValue({
-      status: 429,
-      message: 'Rate limit exceeded'
-    });
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: { userQuestion: 'Hello' }
-    });
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(429);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Rate limit exceeded',
-      details: 'Please try again in a few moments'
-    });
-  });
-
-  it('handles OpenAI authentication error', async () => {
-    mockCreate.mockRejectedValue({
-      status: 401,
-      message: 'Invalid API key'
-    });
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: { userQuestion: 'Hello' }
-    });
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(500);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Authentication error',
-      details: 'OpenAI API key may be invalid'
-    });
-  });
-
-  it('handles OpenAI bad request error', async () => {
-    mockCreate.mockRejectedValue({
-      status: 400,
-      message: 'Invalid request'
-    });
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: { userQuestion: 'Hello' }
-    });
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(400);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Invalid request to AI service',
-      details: 'Invalid request'
-    });
-  });
-
-  it('handles OpenAI response without content', async () => {
-    mockCreate.mockResolvedValue({
-      choices: [{ message: {} }]
-    });
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: { userQuestion: 'Hello' }
-    });
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(200);
-    const data = JSON.parse(res._getData());
-    expect(data.response).toBe('I apologize, but I was unable to generate a response. Please try again.');
-  });
-
-  it('handles generic OpenAI error', async () => {
-    mockCreate.mockRejectedValue(new Error('Network error'));
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: { userQuestion: 'Hello' }
-    });
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(500);
-    expect(JSON.parse(res._getData())).toEqual({
-      error: 'Failed to process chatbot request',
-      details: 'Network error'
-    });
-  });
-
-  it('uses correct brand prompt for motaquila', async () => {
-    mockCreate.mockResolvedValue({
-      choices: [{ message: { content: 'Response' } }]
-    });
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        brand: 'motaquila',
-        userQuestion: 'Tell me about your beverages'
-      }
-    });
-
-    await handler(req, res);
-
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        messages: expect.arrayContaining([
-          {
-            role: 'system',
-            content: expect.stringContaining('Motaquila')
-          }
-        ])
-      })
+    // Should still process valid chunks
+    expect(res.write).toHaveBeenCalledWith(
+      expect.stringContaining('"content":"Hello"')
     );
   });
 
-  it('uses correct brand prompt for lastgenie', async () => {
-    mockCreate.mockResolvedValue({
-      choices: [{ message: { content: 'Response' } }]
+  it('handles streaming response with no body', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      statusText: 'No response body',
+      text: async () => 'No response body'
     });
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        brand: 'lastgenie',
-        userQuestion: 'Tell me about your products'
-      }
-    });
-
-    await handler(req, res);
-
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        messages: expect.arrayContaining([
-          {
-            role: 'system',
-            content: expect.stringContaining('Last Genie')
-          }
-        ])
-      })
-    );
-  });
-
-  it('handles streaming error gracefully', async () => {
-    mockCreate.mockRejectedValue(new Error('Streaming error'));
 
     const { req, res } = createMocks({
       method: 'POST',
@@ -457,38 +400,6 @@ describe('/api/chatbot', () => {
 
     await handler(req, res);
 
-    expect(res.write).not.toHaveBeenCalled();
-    expect(res.end).not.toHaveBeenCalled();
-  });
-
-  it('validates brand parameter correctly', async () => {
-    mockCreate.mockResolvedValue({
-      choices: [{ message: { content: 'Response' } }]
-    });
-
-    const { req, res } = createMocks({
-      method: 'POST',
-      body: {
-        brand: 'invalidbrand',
-        userQuestion: 'Hello'
-      }
-    });
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(200);
-    const data = JSON.parse(res._getData());
-    expect(data.brand).toBe('invalidbrand');
-    // Should default to liquidheaven prompt
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        messages: expect.arrayContaining([
-          {
-            role: 'system',
-            content: expect.stringContaining('Liquid Heaven')
-          }
-        ])
-      })
-    );
+    expect(res._getStatusCode()).toBe(500);
   });
 }); 

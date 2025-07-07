@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
+import fetch from 'node-fetch';
 
 // Types for better TypeScript support
 interface ChatbotRequest {
@@ -19,25 +19,37 @@ interface ChatbotError {
   details?: string;
 }
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Anthropic API response types
+interface AnthropicContent {
+  type: string;
+  text: string;
+}
+
+interface AnthropicMessage {
+  role: string;
+  content: AnthropicContent[];
+}
+
+interface AnthropicResponse {
+  id: string;
+  type: string;
+  role: string;
+  content: AnthropicContent[];
+  model: string;
+  stop_reason: string;
+  stop_sequence: string | null;
+  usage: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+}
 
 // Brand-specific system prompts
 const getBrandPrompt = (brand: string): string => {
   const brandPrompts: Record<string, string> = {
-    liquidheaven: `You are a helpful customer service assistant for Liquid Heaven, a premium wellness and CBD products brand. 
-    You help customers with product recommendations, usage questions, and general wellness advice. 
-    Be knowledgeable about CBD benefits, wellness practices, and Liquid Heaven's product line.`,
-    
-    motaquila: `You are a helpful customer service assistant for Motaquila, a premium beverage brand. 
-    You help customers with product recommendations, cocktail recipes, and beverage-related questions. 
-    Be knowledgeable about premium spirits, mixology, and Motaquila's product offerings.`,
-    
-    lastgenie: `You are a helpful customer service assistant for Last Genie, a specialty products brand. 
-    You help customers with product recommendations, usage instructions, and general inquiries. 
-    Be knowledgeable about Last Genie's unique product line and customer needs.`
+    liquidheaven: `You are a helpful customer service assistant for Liquid Heaven, a premium wellness and CBD products brand.\nYou help customers with product recommendations, usage questions, and general wellness advice.\nBe knowledgeable about CBD benefits, wellness practices, and Liquid Heaven's product line.`,
+    motaquila: `You are a helpful customer service assistant for Motaquila, a premium beverage brand.\nYou help customers with product recommendations, cocktail recipes, and beverage-related questions.\nBe knowledgeable about premium spirits, mixology, and Motaquila's product offerings.`,
+    lastgenie: `You are a helpful customer service assistant for Last Genie, a specialty products brand.\nYou help customers with product recommendations, usage instructions, and general inquiries.\nBe knowledgeable about Last Genie's unique product line and customer needs.`
   };
   
   return brandPrompts[brand] || brandPrompts.liquidheaven; // Default to Liquid Heaven
@@ -46,10 +58,6 @@ const getBrandPrompt = (brand: string): string => {
 // Input validation
 const validateRequest = (body: any): { isValid: boolean; error?: string } => {
   if (!body.userQuestion || typeof body.userQuestion !== 'string') {
-    return { isValid: false, error: 'userQuestion is required and must be a string' };
-  }
-  
-  if (body.userQuestion.trim().length === 0) {
     return { isValid: false, error: 'userQuestion cannot be empty' };
   }
   
@@ -62,7 +70,7 @@ const validateRequest = (body: any): { isValid: boolean; error?: string } => {
   }
   
   if (body.pageContext && typeof body.pageContext !== 'string') {
-    return { isValid: false, error: 'pageContext type must be a string' };
+    return { isValid: false, error: 'pageContext must be a string' };
   }
   
   return { isValid: true };
@@ -78,11 +86,11 @@ export default async function handler(
 
   try {
     // Validate API key
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('❌ OpenAI API key not configured');
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('❌ Anthropic Claude API key not configured');
       return res.status(500).json({ 
         error: 'Chatbot service not configured',
-        details: 'OpenAI API key missing'
+        details: 'Anthropic Claude API key missing'
       });
     }
 
@@ -111,6 +119,32 @@ export default async function handler(
     // Check if streaming is requested
     const shouldStream = req.headers.accept?.includes('text/event-stream');
 
+    const anthropicUrl = 'https://api.anthropic.com/v1/messages';
+    const headers: Record<string, string> = {
+      'x-api-key': process.env.ANTHROPIC_API_KEY!,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    };
+    const body = {
+      model: 'claude-3-sonnet-20240229',
+      max_tokens: 500,
+      temperature: 0.7,
+      system: systemPrompt,
+      messages: [
+        { role: 'user', content: userQuestion }
+      ],
+      stream: shouldStream,
+    };
+
+    // Log outgoing request (excluding API key)
+    const debugHeaders = { ...headers };
+    if (debugHeaders['x-api-key']) debugHeaders['x-api-key'] = '[REDACTED]';
+    console.log('Anthropic API Request:', {
+      url: anthropicUrl,
+      headers: debugHeaders,
+      body,
+    });
+
     if (shouldStream) {
       // Set up streaming response
       res.setHeader('Content-Type', 'text/event-stream');
@@ -119,31 +153,40 @@ export default async function handler(
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
-      // Create streaming completion
-      const stream = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userQuestion
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-        stream: true
+      const response = await fetch(anthropicUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
       });
 
-      let fullResponse = '';
+      if (!response.ok || !response.body) {
+        const errorText = await response.text();
+        console.error('Anthropic API Error Response:', errorText);
+        throw new Error(`Anthropic API error: ${response.statusText}`);
+      }
 
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullResponse += content;
-          res.write(`data: ${JSON.stringify({ content, timestamp: new Date().toISOString() })}\n\n`);
+      // Type assertion for ReadableStream
+      const reader = (response.body as any).getReader();
+      let fullResponse = '';
+      let decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        // Anthropic streams JSON lines, one per message delta
+        for (const line of chunk.split('\n')) {
+          if (!line.trim()) continue;
+          try {
+            const data = JSON.parse(line);
+            const content = data?.content?.[0]?.text || '';
+            if (content) {
+              fullResponse += content;
+              res.write(`data: ${JSON.stringify({ content, timestamp: new Date().toISOString() })}\n\n`);
+            }
+          } catch (e) {
+            // Ignore malformed lines
+          }
         }
       }
 
@@ -154,30 +197,26 @@ export default async function handler(
       console.log(`✅ Chatbot streaming response completed for ${brand}`);
     } else {
       // Non-streaming response
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userQuestion
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-        stream: false
+      const response = await fetch(anthropicUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
       });
 
-      const response = completion.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response. Please try again.';
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Anthropic API Error Response:', errorText);
+        throw new Error(`Anthropic API error: ${response.statusText}`);
+      }
+
+      const data = await response.json() as AnthropicResponse;
+      const content = data?.content?.[0]?.text || 'I apologize, but I was unable to generate a response. Please try again.';
 
       console.log(`✅ Chatbot response generated for ${brand}`);
 
       // Return response
       const chatbotResponse: ChatbotResponse = {
-        response,
+        response: content,
         brand,
         timestamp: new Date().toISOString()
       };
@@ -187,28 +226,6 @@ export default async function handler(
 
   } catch (error: any) {
     console.error('❌ Chatbot API error:', error);
-
-    // Handle specific OpenAI errors
-    if (error?.status === 429) {
-      return res.status(429).json({ 
-        error: 'Rate limit exceeded',
-        details: 'Please try again in a few moments'
-      });
-    }
-
-    if (error?.status === 401) {
-      return res.status(500).json({ 
-        error: 'Authentication error',
-        details: 'OpenAI API key may be invalid'
-      });
-    }
-
-    if (error?.status === 400) {
-      return res.status(400).json({ 
-        error: 'Invalid request to AI service',
-        details: error.message
-      });
-    }
 
     // Generic error response
     res.status(500).json({

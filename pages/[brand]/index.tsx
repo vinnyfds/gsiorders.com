@@ -233,11 +233,7 @@ const BrandPage: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={`Search ${brand.name} products...`}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:border-transparent transition-colors"
-              style={{
-                focusRingColor: brandColor,
-                focusBorderColor: brandColor,
-              }}
+              className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[${brandColor}] focus:border-transparent transition-colors`}
             />
           </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCart } from '../hooks/useCart';
+import ChatTrigger from './ChatTrigger';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -265,6 +266,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </footer>
+
+      {/* Chat Trigger */}
+      <ChatTrigger />
     </div>
   );
 };

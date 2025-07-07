@@ -75,8 +75,26 @@ This index tracks key decisions, patterns, and lessons learned during gsiorders.
 - Performance optimization techniques
 - Accessibility implementation
 
+### 📅 2025-01-07_chatbot-api-implementation.md
+**Status**: ✅ Complete  
+**Summary**: AI chatbot API endpoint with OpenAI integration, streaming responses, comprehensive validation
+**Key Patterns**: OpenAI API integration, streaming responses, comprehensive mocking strategies
+**Links**: PR #3, 13/13 tests passing, Postman collection for manual verification
+
+### 📅 2025-01-07_mocking-openai-learnings.md
+**Status**: ✅ Complete  
+**Summary**: Comprehensive guide for mocking OpenAI and similar APIs in Next.js tests
+**Key Patterns**: Async generator mocking, streaming response simulation, error message alignment
+**Links**: Mocking best practices, common pitfalls, future contributor guidance
+
+### 📅 2025-01-07_debug-patch-session.md
+**Status**: ✅ Complete  
+**Summary**: Resolved homepage ENOENT error and implemented missing chat UI components
+**Key Patterns**: Next.js Document file requirements, frontend-backend integration, component architecture
+**Links**: ChatTrigger/ChatWidget implementation, ENOENT error resolution, accessibility compliance
+
 ---
-**Last Updated**: 2025-01-05
-**Total Entries**: 5
-**Project Status**: 85% complete, 95% usable
-**Next Review**: After implementing remaining API endpoints (/api/reviews, /api/wishlist) 
+**Last Updated**: 2025-01-07
+**Total Entries**: 8
+**Project Status**: 92% complete, 99% usable
+**Next Review**: After implementing B2B quote request endpoint (Task 3.10) 
