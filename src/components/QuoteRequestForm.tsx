@@ -62,10 +62,13 @@ const QuoteRequestForm: React.FC<QuoteRequestFormProps> = ({ brandSlug }) => {
                 body: JSON.stringify({
                     company_name: companyName,
                     contact_name: contactName,
-                    email,
-                    phone,
-                    items,
-                    notes,
+                    contact_email: email,
+                    contact_phone: phone,
+                    items: items.map(item => ({
+                        product_id: item.productId,
+                        quantity: item.quantity
+                    })),
+                    additional_notes: notes,
                     brand: brandSlug,
                 }),
             });
@@ -79,7 +82,7 @@ const QuoteRequestForm: React.FC<QuoteRequestFormProps> = ({ brandSlug }) => {
                 window.alert('Quote request submitted successfully!');
             } else {
                 const data = await res.json();
-                window.alert(data.error || 'Failed to submit quote request.');
+                window.alert(data.message || data.error || 'Failed to submit quote request.');
             }
         } catch (err) {
             window.alert('Network error. Please try again.');
