@@ -32,22 +32,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userId = '123e4567-e89b-12d3-a456-426614174000';
 
     // Check if product is in wishlist
-    const { data: wishlistItem, error } = await supabase
+    const { data: existingItem, error } = await supabase
       .from('wishlist_items')
-      .select('id')
+      .select('user_id, product_id')
       .eq('user_id', userId)
       .eq('product_id', productId)
-      .single();
+      .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error checking wishlist:', error);
       return res.status(500).json({ error: 'Failed to check wishlist' });
     }
 
-    const isInWishlist = !!wishlistItem;
+    const isSaved = !!existingItem;
 
     return res.status(200).json({ 
-      isInWishlist,
+      isSaved,
       success: true
     });
 
