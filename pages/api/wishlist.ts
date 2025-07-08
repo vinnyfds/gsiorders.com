@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (!action || !['add', 'remove'].includes(action)) {
-      return res.status(400).json({ error: 'Action must be "add" or "remove"' });
+      return res.status(400).json({ error: 'Invalid action' });
     }
 
     // For development, use test user ID
@@ -50,12 +50,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Check if already in wishlist
       const { data: existingItem, error: checkError } = await supabase
         .from('wishlist_items')
-        .select('id')
+        .select('user_id, product_id')
         .eq('user_id', userId)
         .eq('product_id', productId)
-        .single();
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') {
+      if (checkError) {
         console.error('Error checking wishlist:', checkError);
         return res.status(500).json({ error: 'Failed to check wishlist' });
       }
@@ -65,15 +65,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Add to wishlist
-      const { data: wishlistItem, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('wishlist_items')
-        .insert({
-          user_id: userId,
-          product_id: productId,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+        .insert([{ user_id: userId, product_id: productId }]);
 
       if (insertError) {
         console.error('Error adding to wishlist:', insertError);
@@ -81,33 +75,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       console.log(`✅ Added to wishlist: ${productId} for user: ${userId}`);
-      return res.status(200).json({ 
-        success: true, 
-        isSaved: true,
-        message: 'Added to wishlist'
-      });
+      return res.status(200).json({ success: true });
 
     } else if (action === 'remove') {
       // Remove from wishlist
-      const { data: deletedItem, error: deleteError } = await supabase
+      const { error: deleteError } = await supabase
         .from('wishlist_items')
         .delete()
         .eq('user_id', userId)
-        .eq('product_id', productId)
-        .select()
-        .single();
+        .eq('product_id', productId);
 
-      if (deleteError && deleteError.code !== 'PGRST116') {
+      if (deleteError) {
         console.error('Error removing from wishlist:', deleteError);
         return res.status(500).json({ error: 'Failed to remove from wishlist' });
       }
 
       console.log(`🗑️ Removed from wishlist: ${productId} for user: ${userId}`);
-      return res.status(200).json({ 
-        success: true, 
-        isSaved: false,
-        message: 'Removed from wishlist'
-      });
+      return res.status(200).json({ success: true });
     }
 
   } catch (error: any) {
