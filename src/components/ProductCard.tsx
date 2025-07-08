@@ -1,5 +1,6 @@
 // src/components/ProductCard.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
+import WishlistButton from "./WishlistButton";
 
 interface Product {
   id: string;
@@ -22,6 +23,25 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
+  // Check if product is in wishlist on component mount
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      try {
+        const response = await fetch(`/api/wishlist/check?productId=${product.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsInWishlist(data.isInWishlist);
+        }
+      } catch (error) {
+        console.error('Error checking wishlist status:', error);
+      }
+    };
+
+    checkWishlistStatus();
+  }, [product.id]);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -33,6 +53,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     if (onAddToCart) {
       onAddToCart(product.id);
     }
+  };
+
+  const handleWishlistToggle = (productId: string, isSaved?: boolean) => {
+    setIsInWishlist(isSaved ?? !isInWishlist);
   };
 
   const productImage = "https://picsum.photos/400/400?random=" + product.id;
@@ -52,6 +76,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300" />
 
+        {/* Wishlist Button - Top Right */}
+        <div className="absolute top-3 right-3 z-10">
+          <WishlistButton
+            productId={product.id}
+            isSaved={isInWishlist}
+            onToggle={handleWishlistToggle}
+          />
+        </div>
+
         {/* Stock Status Badge */}
         {!isInStock && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl">
@@ -61,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
 
         {/* Low Stock Badge */}
         {isInStock && product.inventory_count <= 5 && (
-          <div className="absolute top-3 right-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+          <div className="absolute top-3 left-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
             Only {product.inventory_count} left
           </div>
         )}
