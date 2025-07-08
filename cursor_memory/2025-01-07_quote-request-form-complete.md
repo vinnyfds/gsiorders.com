@@ -35,6 +35,34 @@ Successfully implemented **QuoteRequestForm.tsx** as a comprehensive B2B quote r
 6. **Responsive Design**: Mobile-first Tailwind implementation
 7. **Accessibility**: ARIA labels, keyboard navigation, screen reader support
 
+### **API Field Mapping Fix (2025-01-07):**
+**Issue**: Frontend was sending incorrect field names to API, causing validation errors.
+**Solution**: Updated request body mapping:
+- `email` → `contact_email`
+- `phone` → `contact_phone` 
+- `notes` → `additional_notes`
+- `items.productId` → `items.product_id`
+
+**Before:**
+```typescript
+body: JSON.stringify({
+    email, phone, notes, items, // ❌ Wrong field names
+})
+```
+
+**After:**
+```typescript
+body: JSON.stringify({
+    contact_email: email,
+    contact_phone: phone,
+    additional_notes: notes,
+    items: items.map(item => ({
+        product_id: item.productId,
+        quantity: item.quantity
+    }))
+})
+```
+
 ### **Technical Patterns Used:**
 - **Controlled Components**: All form inputs use React state
 - **Dynamic Form Fields**: Array-based quote items with add/remove
