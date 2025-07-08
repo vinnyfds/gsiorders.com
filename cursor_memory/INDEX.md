@@ -186,14 +186,14 @@ This index tracks key decisions, patterns, and lessons learned during gsiorders.
 **Links**: __tests__/ChatWidget.spec.tsx, testing/manual-chatbot-ui-proof.png, PR #4
 
 ### 📅 2025-01-07_quote-request-form-complete.md
-**Status**: ✅ Complete  
-**Summary**: Implemented QuoteRequestForm component with SSR brand-scoped routing, full validation, and API integration. Includes dynamic quote items, error handling, and comprehensive unit tests.
-**Key Patterns**: Form validation, dynamic form fields, SSR routing, API integration, accessibility compliance
-**Links**: `src/components/QuoteRequestForm.tsx`, `pages/[brand]/quote-request.tsx`, `__tests__/components/QuoteRequestForm.test.tsx`, PR #6 (pending merge)
+**Status**: ✅ Complete & Merged  
+**Summary**: Implemented QuoteRequestForm with SSR, validation, API integration, and error message fix. PR #6 merged to main. Manual proof and all rules applied.
+**Key Patterns**: Form validation, dynamic fields, SSR, API, accessibility
+**Links**: src/components/QuoteRequestForm.tsx, pages/[brand]/quote-request.tsx, __tests__/components/QuoteRequestForm.test.tsx, testing/manual-quote-request.png, PR #6
 
 ## Problems Solved
 
-### �� 2025-01-07_chatbot-anthropic-migration.md
+### 📅 2025-01-07_chatbot-anthropic-migration.md
 **Status**: ✅ Complete  
 **Summary**: Migrated chatbot from Anthropic to OpenAI, ensuring seamless continuity
 **Key Patterns**: Migration strategy, API integration, data migration
@@ -211,4 +211,10 @@ This index tracks key decisions, patterns, and lessons learned during gsiorders.
 **Last Updated**: 2025-01-07
 **Total Entries**: 10
 **Project Status**: 98% complete, 100% usable
-**Next Review**: After implementing B2B quote request endpoint (Task 3.10) 
+**Next Review**: After implementing B2B quote request endpoint (Task 3.10)
+
+## �� NEXT TASK: Task 2.12 — Cart Page
+- Implement SSR cart page at `/cart` and `/[brand]/cart`
+- Integrate with useCart hook and CartModal
+- Show cart items, totals, and checkout CTA
+- Full responsive, accessible, tested
