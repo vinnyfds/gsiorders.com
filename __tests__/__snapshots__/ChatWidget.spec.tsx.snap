@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ChatWidget matches snapshot of initial layout 1`] = `
+<div>
+  <div
+    class="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+  >
+    <div
+      class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+    />
+    <div
+      class="relative bg-white border-2 border-brand-primary rounded-2xl shadow-2xl w-full max-w-md mx-auto animate-slide-up"
+    >
+      <div
+        class="flex items-center justify-between p-4 border-b border-brand-primary bg-brand-primary text-white rounded-t-2xl"
+      >
+        <span
+          class="font-semibold"
+        >
+          AI Chat Support
+        </span>
+        <button
+          aria-label="Close chat"
+          class="text-white hover:text-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-full p-1"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-x"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="flex flex-col gap-2 p-4 max-h-96 overflow-y-auto bg-gray-50"
+      >
+        <div
+          class="flex justify-start"
+        >
+          <div
+            aria-label="AI reply"
+            class="max-w-xs bg-white text-gray-900 rounded-xl px-4 py-2 shadow-sm self-start border border-gray-200"
+          >
+            <span>
+              Hello! I'm here to help you with any questions about our products. How can I assist you today?
+              <br />
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="p-4 border-t"
+      >
+        <div
+          class="flex space-x-2"
+        >
+          <input
+            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+            data-testid="chat-input"
+            placeholder="Type your message..."
+            type="text"
+            value=""
+          />
+          <button
+            class="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            data-testid="chat-send"
+            disabled=""
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-send"
+              fill="none"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+              />
+              <path
+                d="m21.854 2.147-10.94 10.939"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -281,64 +281,64 @@ const BrandPage: React.FC<BrandPageProps> = ({ brand, products, error }) => {
         </div>
 
         {/* Products Section */}
-        <div>
-          {/* Results Header */}
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {brand.name} Products
-              </h2>
-              <p className="text-gray-600">
+          <div>
+            {/* Results Header */}
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {brand.name} Products
+                </h2>
+                <p className="text-gray-600">
                 {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}{" "}
-                available
-                {searchTerm && ` matching "${searchTerm}"`}
-              </p>
-            </div>
-
-            <div
-              className="px-4 py-2 rounded-full text-white font-medium"
-              style={{ backgroundColor: brandColor }}
-            >
-              {brand.name}
-            </div>
-          </div>
-
-          {/* Products Grid */}
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="max-w-md mx-auto">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No Products Found
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {searchTerm
-                    ? `No ${brand.name} products match "${searchTerm}"`
-                    : `No ${brand.name} products are currently available`}
+                  available
+                  {searchTerm && ` matching "${searchTerm}"`}
                 </p>
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: brandColor }}
-                  >
-                    Clear Search
-                  </button>
-                )}
+              </div>
+
+              <div
+                className="px-4 py-2 rounded-full text-white font-medium"
+                style={{ backgroundColor: brandColor }}
+              >
+                {brand.name}
               </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            {/* Products Grid */}
+          {filteredProducts.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="max-w-md mx-auto">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    No Products Found
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {searchTerm
+                      ? `No ${brand.name} products match "${searchTerm}"`
+                      : `No ${brand.name} products are currently available`}
+                  </p>
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: brandColor }}
+                    >
+                      Clear Search
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
         {/* Other Brands CTA */}
         <div className="mt-16 text-center">
